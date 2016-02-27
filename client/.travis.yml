@@ -1,0 +1,55 @@
+sudo: required
+os:
+  - linux
+  - osx
+language: go
+go:
+  - 1.5
+services:
+  - docker
+before_install:
+  - if [ $TRAVIS_OS_NAME == 'linux' ]; then
+      export DEBIAN_FRONTEND=noninteractive;
+      sudo apt-get update;
+      sudo apt-get install -q -y --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" docker-engine;
+    elif [ $TRAVIS_OS_NAME == 'osx' ]; then
+      brew install gnupg2;
+      security create-keychain -p travis test.keychain;
+      security default-keychain -s test.keychain;
+      security unlock-keychain -p travis test.keychain;
+      security set-keychain-settings -t 3600 -u test.keychain;
+    fi
+install: true
+script:
+  - export GO15VENDOREXPERIMENT=1
+  - if [ $TRAVIS_OS_NAME == 'linux' ]; then
+      docker login -e $CI_EMAIL -u $CI_USER -p $CI_PASS $CI_HOST;
+      docker pull $CI_HOST/kbweb;
+      travis_retry docker run --name kbweb3000 -d -p 3000:3000 $CI_HOST/kbweb;
+      cd go && ./test/check_or_start_kbweb.sh && ./test/run_tests.sh;
+    elif [ $TRAVIS_OS_NAME == 'osx' ]; then
+      cd go && export KEYBASE_SERVER_URI=http://ci1.keybase.io && ./test/run_tests.sh;
+    fi
+  - if [ $TRAVIS_OS_NAME == 'linux' ] && [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+      docker build -t kbclient .;
+    fi
+  - cd ../shared && npm i --global flow-bin@`tail -n1 .flowconfig` && flow
+after_failure:
+  - if [ $TRAVIS_OS_NAME == 'linux' ]; then
+      docker logs kbweb3000;
+    fi
+after_success:
+  - if [ $TRAVIS_OS_NAME == 'linux' ] && [ $TRAVIS_BRANCH == 'master' ] && [ $TRAVIS_PULL_REQUEST == 'false' ]; then
+      docker login -e $CI_EMAIL -u $CI_USER -p $CI_PASS $CI_HOST;
+      docker tag kbclient $CI_HOST/kbclient;
+      docker push $CI_HOST/kbclient;
+    else
+      echo "Not pushing to Docker, because this isn't a push to master.";
+    fi
+notifications:
+  slack:
+    rooms:
+      secure: W5hUm0MPWJ3v2VGRAq9fxgroVvqFOkwnbrxllEX3Zadf3e909fwQzm7KEUvSEd9fhsKrdBxPrphCZd1UCq5cXjCkfokKFojnbgnYPKZYgL4M7GWqiURCfIUY7r0gQCDnFzIIANacIbhT8089IkQva8QWCdfX4zVycTKOvMC0msE=
+matrix:
+  allow_failures:
+    - os: osx

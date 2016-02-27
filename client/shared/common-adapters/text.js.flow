@@ -1,0 +1,32 @@
+/* @flow */
+
+import React, {Component} from 'react'
+
+export type Background = 'Normal' | 'Announcements' | 'Success' | 'Information' | 'HighRisk' | 'Documentation' | 'Terminal'
+export type Props = {
+  type: 'HeaderJumbo' | 'HeaderBig' | 'Header'
+          | 'Body' | 'BodySemibold' | 'BodySmall' | 'BodySmallSemibold' | 'BodyPrimaryLink' | 'BodySecondaryLink'
+          | 'Error'
+          | 'Terminal'
+          | 'TerminalUsername' | 'TerminalPublic' | 'TerminalPrivate'
+          | 'TerminalCommand' | 'TerminalComment' | 'TerminalEmpty',
+  backgroundMode?: Background,
+  inline?: boolean,
+  link?: boolean,
+  small?: boolean,
+  reversed?: boolean,
+  onClick?: () => void,
+  lineClamp?: number,
+  style?: Object,
+  dz2?: boolean, // Use DZ2 styling?
+  children?: React$Element,
+  className?: string
+}
+
+declare export default class Text extends React.Component {
+  props: Props;
+}
+
+declare export var styles: Object
+
+declare function lineClamp (lines: number): Object

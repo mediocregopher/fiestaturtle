@@ -1,0 +1,37 @@
+/* @flow */
+import React, {Component} from 'react'
+
+export type RenderProps = {
+  username: ?string,
+  openKBFS: () => void,
+  openKBFSPublic: (username: ?string) => void,
+  logIn: () => void,
+  openKBFSPrivate: (username: ?string) => void,
+  showMain: () => void,
+  showHelp: () => void,
+  showUser: (username: ?string) => void,
+  quit: () => void,
+  folders: Array<FolderInfo>,
+  debug?: boolean,
+  loading: boolean,
+  loggedIn: boolean
+}
+
+export default class Render extends Component {
+  props: RenderProps;
+}
+
+export type FolderInfo = {
+    type: 'folder',
+    folderName: string,
+    isPublic: boolean,
+    isEmpty: boolean,
+    openFolder: () => void
+}
+
+export type FolderEntry = {
+    type: 'entry',
+    prefix: string,
+    isPublic: boolean,
+    openFolder: (val: string) => void
+}
