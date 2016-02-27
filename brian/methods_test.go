@@ -24,7 +24,7 @@ func init() {
 	}
 }
 
-func TestUploadSongData(t *T) {
+func randSong(t *T) Song {
 	h := RPC()
 	songContent := []byte(testutil.RandStr())
 	imgContent := []byte(testutil.RandStr())
@@ -57,16 +57,51 @@ func TestUploadSongData(t *T) {
 	err = rpcutil.JSONRPC2CallHandler(h, &res, "Brian.UploadSongData", &args)
 	require.Nil(t, err)
 
-	assert.NotEmpty(t, res.Song.Uploaded.ID)
-	assert.NotEmpty(t, res.Song.Uploaded.UploaderID)
-	s.Uploaded = res.Song.Uploaded
+	return res.Song
+}
 
-	assert.NotEmpty(t, res.Song.UploadedSongMeta.DataID)
-	s.UploadedSongMeta = res.Song.UploadedSongMeta
+func TestUploadSongData(t *T) {
+	s := randSong(t)
+	assert.NotEmpty(t, s.Uploaded.ID)
+	assert.NotEmpty(t, s.Uploaded.UploaderID)
 
-	assert.Empty(t, res.Song.SongMeta.Images[0].Data)
-	assert.NotEmpty(t, res.Song.SongMeta.Images[0].ID)
-	s.SongMeta.Images = res.Song.SongMeta.Images
+	assert.NotEmpty(t, s.UploadedSongMeta.DataID)
 
-	assert.Equal(t, s, res.Song)
+	assert.Empty(t, s.SongMeta.Images[0].Data)
+	assert.NotEmpty(t, s.SongMeta.Images[0].ID)
+}
+
+func randPlaylist(t *T) Playlist {
+	h := RPC()
+	p := Playlist{
+		Name: testutil.RandStr(),
+		Songs: []Song{
+			randSong(t),
+			randSong(t),
+			randSong(t),
+		},
+	}
+	args := CreatePlaylistArgs{p}
+	var res CreatePlaylistRes
+	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.CreatePlaylist", &args)
+	require.Nil(t, err)
+
+	return res.Playlist
+}
+
+func TestCreatePlaylist(t *T) {
+	p := randPlaylist(t)
+	assert.NotEmpty(t, p.Uploaded.ID)
+	assert.NotEmpty(t, p.Uploaded.UploaderID)
+}
+
+func TestGetPlaylistByID(t *T) {
+	h := RPC()
+	p := randPlaylist(t)
+
+	args := GetPlaylistByIDArgs{p.ID}
+	var res GetPlaylistByIDRes
+	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.GetPlaylistByID", &args)
+	require.Nil(t, err)
+	assert.Equal(t, p, res.Playlist)
 }

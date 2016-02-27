@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"log"
 	"net/http"
 	"os"
 
@@ -51,7 +50,6 @@ func (_ Brian) UploadSongData(r *http.Request, args *UploadSongArgs, res *Upload
 }
 
 func uploadSong(s *Song, path string) error {
-	log.Printf("uploading song file at %q", path)
 	songF, err := os.Open(path)
 	if err != nil {
 		return err
@@ -64,20 +62,17 @@ func uploadSong(s *Song, path string) error {
 	}
 
 	s.UploadedSongMeta.DataID = songID
-	log.Printf("done uploading %q (%q)", path, songID)
 	return nil
 }
 
 func uploadSongImgs(s *Song) error {
 	for i, img := range s.SongMeta.Images {
-		log.Printf("uploading song image")
 		imgID, err := putRaw(bytes.NewBuffer(img.Data))
 		if err != nil {
 			return err
 		}
 		s.SongMeta.Images[i].ID = imgID
 		s.SongMeta.Images[i].Data = nil
-		log.Printf("done uploading song image (%q)", imgID)
 	}
 
 	return nil
@@ -85,6 +80,32 @@ func uploadSongImgs(s *Song) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type CreateSongArgs struct {
-	Song Song
+type CreatePlaylistArgs struct {
+	Playlist Playlist `json:"playlist"`
+}
+
+type CreatePlaylistRes struct {
+	Playlist Playlist `json:"playlist"`
+}
+
+func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *CreatePlaylistRes) error {
+	res.Playlist = args.Playlist
+	res.Playlist.Uploaded = &Uploaded{}
+	_, err := put(&res.Playlist)
+	return err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type GetPlaylistByIDArgs struct {
+	PlaylistID BlockID `json:"playlistID"`
+}
+
+type GetPlaylistByIDRes struct {
+	Playlist Playlist `json:"playlist"`
+}
+
+func (_ Brian) GetPlaylistByID(r *http.Request, args *GetPlaylistByIDArgs, res *GetPlaylistByIDRes) error {
+	res.Playlist.Uploaded = &Uploaded{}
+	return get(args.PlaylistID, &res.Playlist)
 }

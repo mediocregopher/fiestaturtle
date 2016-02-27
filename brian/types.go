@@ -63,15 +63,26 @@ type Playlist struct {
 	Songs []Song `json:"songs"`
 }
 
+type User struct {
+	Version int `json:"version"`
+	*Uploaded
+	Name      string     `json:"name"`
+	Playlists []Playlist `json:"playlists"` // Songs won't be filled in on these
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type uploader interface {
-	uploaded(BlockID) error
+	uploaded(BlockID)
+	sign() error
 }
 
-func (u *Uploaded) uploaded(id BlockID) error {
-	u.ID = id
+func (u *Uploaded) sign() error {
 	u.UploaderID = getNodeID()
 	u.UploaderSig = []byte{} // TODO actually do this
 	return nil
+}
+
+func (u *Uploaded) uploaded(id BlockID) {
+	u.ID = id
 }

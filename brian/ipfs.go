@@ -22,12 +22,24 @@ func get(id BlockID, res interface{}) error {
 		}
 		defer r.Close()
 
-		err = json.NewDecoder(r).Decode(res)
+		if err = json.NewDecoder(r).Decode(res); err != nil {
+			return
+		}
+
+		if ut, ok := res.(uploader); ok {
+			ut.uploaded(id)
+		}
 	})
 	return err
 }
 
 func put(res interface{}) (BlockID, error) {
+	if ut, ok := res.(uploader); ok {
+		if err := ut.sign(); err != nil {
+			return "", err
+		}
+	}
+
 	buf := new(bytes.Buffer)
 	if err := json.NewEncoder(buf).Encode(res); err != nil {
 		return "", err
@@ -39,9 +51,7 @@ func put(res interface{}) (BlockID, error) {
 	}
 
 	if ut, ok := res.(uploader); ok {
-		if err := ut.uploaded(id); err != nil {
-			return "", err
-		}
+		ut.uploaded(id)
 	}
 
 	return id, nil
