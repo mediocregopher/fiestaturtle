@@ -14,6 +14,13 @@ function checkingFileMeta (files: Array<string>): CheckFileMeta {
   }
 }
 
+function bufferToBase64(buf) {
+  var binstr = Array.prototype.map.call(buf, function (ch) {
+    return String.fromCharCode(ch);
+  }).join('');
+  return btoa(binstr);
+}
+
 export function showFileMeta (files: Array<string>): TypedAsyncAction<ShowFileMeta | CheckFileMeta> {
   return (dispatch, getState) => {
     dispatch(checkingFileMeta(files))
@@ -35,6 +42,7 @@ export function updateFileMeta (metadata: SongMetaData): TypedAsyncAction<Update
     if (getState().upload.phase === 'uploadToService') {
       // TODO upload to brian
 
+      // const pictures = metadata.picture.map(p => bufferToBase64(p.data))
       setTimeout(() => dispatch({type: Constants.uploadFinished, payload: {}}), 3e3)
     }
   }
