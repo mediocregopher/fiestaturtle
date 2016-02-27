@@ -1,0 +1,51 @@
+[ignore]
+
+.*/node_modules/babel.*
+.*/node_modules/react/.*
+.*/node_modules/fbjs/.*
+.*/node_modules/is-my-json-valid/.*
+.*/node_modules/json5/.*
+.*/node_modules/binary-extensions/.*
+.*/node_modules/npm/.*
+.*/node_modules/react-tap-event-plugin/node_modules/.*
+.*/react/node_modules/.*
+../desktop/build/.*
+
+
+.*/node_modules/builtin-modules/.*
+.*/node_modules/resolve/lib/.*
+.*/node_modules/resolve/.*
+.*/node_modules/sha.js/test/.*
+.*/node_modules/spdx-exceptions/.*
+.*/node_modules/spdx-license-ids/.*
+.*/node_modules/ua-parser-js/.*
+.*/node_modules/y18n/.*
+
+[include]
+../desktop
+
+[libs]
+./libs/immutable.js.flow
+./libs/flow-interface.js
+
+[options]
+munge_underscores=true
+
+module.system.node.resolve_dirname=../desktop/node_modules
+
+module.name_mapper='^image![a-zA-Z0-9$_-]+$' -> 'GlobalImageStub'
+module.name_mapper='^[./a-zA-Z0-9$_-]+\.png$' -> 'RelativeImageStub'
+
+module.name_mapper='^\..*resolve-root' -> 'resolveRoot'
+
+suppress_type=$FlowIssue
+suppress_type=$FlowFixMe
+suppress_type=$FixMe
+
+suppress_comment=\\(.\\|\n\\)*\\$FlowFixMe\\($\\|[^(]\\|(\\(>=0\\.\\(1[0-7]\\|[0-9]\\).[0-9]\\)? *\\(site=[a-z,_]*react_native[a-z,_]*\\)?)\\)
+suppress_comment=\\(.\\|\n\\)*\\$FlowIssue\\((\\(>=0\\.\\(1[0-7]\\|[0-9]\\).[0-9]\\)? *\\(site=[a-z,_]*react_native[a-z,_]*\\)?)\\)? #[0-9]+
+suppress_comment=\\(.\\|\n\\)*\\$FlowFixedInNextDeploy
+suppress_comment=\\(.\\|\n\\)*\\$FlowIssue
+
+[version]
+0.22.0

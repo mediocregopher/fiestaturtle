@@ -1,0 +1,16 @@
+/* @flow */
+
+import React, {Component} from 'react'
+
+export type Props = {
+  label: string,
+  onCheck: (newCheckedValue: boolean) => void,
+  checked: boolean,
+  style?: Object,
+  dz2?: boolean,
+  disabled?: boolean
+}
+
+declare export default class Checkbox extends React.Component {
+  props: Props;
+}

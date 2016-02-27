@@ -1,0 +1,17 @@
+/* @flow */
+
+import React, {Component} from 'react'
+
+export type Context = {
+  inTerminal?: bool
+}
+
+export type Props = {
+  style?: Object,
+  dz2?: boolean,
+  children?: React$Element
+}
+
+declare export default class Terminal extends React.Component {
+  props: Props;
+}

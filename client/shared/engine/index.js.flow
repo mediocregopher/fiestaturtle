@@ -1,0 +1,14 @@
+/* @flow */
+
+import type {rpc, incomingCallMapType} from '../constants/types/flow-types'
+
+declare class Engine {
+  rpc (params: rpc): void;
+  cancelRPC (sessionID: number): void;
+  listenOnConnect (key: string, f: () => void): void;
+  listenGeneralIncomingRpc (m: incomingCallMapType): void;
+}
+
+var engine = new Engine()
+
+export default engine

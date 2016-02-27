@@ -1,0 +1,225 @@
+/* Reset */
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+/* End reset */
+
+/* Noto Sans */
+@font-face {
+    font-family: "Noto Sans";
+    font-style: normal;
+    font-weight: normal;
+    src: url(fonts/NotoSans-Regular.ttf);
+}
+@font-face {
+    font-family: "Noto Sans Italic";
+    font-style: italic;
+    font-weight: normal;
+    src: url(fonts/NotoSans-Italic.ttf);
+}
+@font-face {
+    font-family: "Noto Sans Bold";
+    font-style: normal;
+    font-weight: bold;
+    src: url(fonts/NotoSans-Bold.ttf);
+}
+@font-face {
+    font-family: "Noto Sans Italic";
+    font-style: italic;
+    font-weight: bold;
+    src: url(fonts/NotoSans-BoldItalic.ttf);
+}
+
+/* Roboto */
+@font-face {
+    font-family: 'Roboto';
+    font-weight: 300;
+    src: url(fonts/RobotoLight.ttf);
+    src: local('Roboto Light'), local('Roboto-Light'), format('truetype');
+}
+@font-face {
+    font-family: 'Roboto';
+    font-weight: 400;
+    src: url(fonts/Roboto.ttf);
+    src: local('Roboto'), local('Roboto-Regular'), format('truetype');
+}
+@font-face {
+    font-family: 'Roboto';
+    font-weight: 500;
+    src: url(fonts/RobotoMedium.ttf);
+    src: local('Roboto Medium'), local('Roboto-Medium'), format('truetype');
+}
+
+/* Source Code Pro */
+@font-face {
+    font-family: 'Source Code Pro';
+    font-weight: 400;
+    src: url(fonts/SourceCodePro/SourceCodePro-Regular.ttf);
+    src: local('Source Code Pro'), local('SourceCodePro-Regular'), format('truetype');
+}
+
+@font-face {
+    font-family: 'Source Code Pro';
+    font-weight: 600;
+    src: url(fonts/SourceCodePro/SourceCodePro-Semibold.ttf);
+    src: local('Source Code Pro'), local('SourceCodePro-Semibold'), format('truetype');
+}
+
+/* Lato */
+@font-face {
+    font-family: 'Lato';
+    font-weight: 400;
+    src: url(fonts/lato/Lato-Regular.ttf);
+    src: local('Lato'), local('Lato-Regular'), format('truetype');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-weight: 400;
+    font-style: italic;
+    src: url(fonts/lato/Lato-Italic.ttf);
+    src: local('Lato'), local('Lato-Italic'), format('truetype');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-weight: 600;
+    src: url(fonts/lato/Lato-Semibold.ttf);
+    src: local('Lato'), local('Lato-Semibold'), format('truetype');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-weight: 600;
+    font-style: italic;
+    src: url(fonts/lato/Lato-SemiboldItalic.ttf);
+    src: local('Lato'), local('Lato-SemiboldItalic'), format('truetype');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-weight: 700;
+    src: url(fonts/lato/Lato-Bold.ttf);
+    src: local('Lato'), local('Lato-Bold'), format('truetype');
+}
+
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body * {
+    font-family: 'Lato';
+    overflow: hidden;
+}
+
+#app {
+    position: absolute;
+    display: flex;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0
+}
+
+.hover-underline {
+  text-decoration: none;
+}
+.hover-underline:hover {
+  text-decoration: underline;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+	width: 0;
+}
+
+#banner {
+    border-radius: 10px;
+    width: 150px;
+    height: 110px;
+    background: #f6f6f6;
+    overflow: hidden;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+}
+#banner .fill {
+    -webkit-animation-name: fillAction;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: cubic-bezier(.2, .6, .8, .4);
+    -webkit-animation-duration: 4s;
+    -webkit-animation-fill-mode: forwards;
+}
+#banner #waveShape {
+    -webkit-animation-name: waveAction;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    -webkit-animation-duration: 0.5s;
+    width:300px;
+    height: 150px;
+    fill: #04ACFF;
+}
+@-webkit-keyframes fillAction {
+    0% {
+        -webkit-transform: translate(0, 150px);
+    }
+    100% {
+        -webkit-transform: translate(0, -5px);
+    }
+}
+@-webkit-keyframes waveAction {
+    0% {
+        -webkit-transform: translate(-150px, 0);
+    }
+    100% {
+        -webkit-transform: translate(0, 0);
+    }
+}
