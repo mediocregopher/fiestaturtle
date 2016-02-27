@@ -16,7 +16,7 @@ type Uploaded struct {
 
 type Song struct {
 	Version int `json:"version"`
-	Uploaded
+	*Uploaded
 
 	SongMeta SongMeta `json:"meta"`
 
@@ -29,16 +29,16 @@ type Song struct {
 }
 
 type SongMeta struct {
-	Title       string      `json:"title,omitempty"`
-	Artist      []string    `json:"artist,omitempty"`
-	Album       string      `json:"album,omitempty"`
-	AlbumArtist []string    `json:"albumartist,omitempty"`
-	Year        string      `json:"year,omitempty"`
-	Track       NoOf        `json:"track,omitempty"`
-	Disk        NoOf        `json:"disk,omitempty"`
-	Genre       []string    `json:"genre,omitempty"`
-	Picture     []SongImage `json:"picture,omitempty"`
-	Duration    float64     `json:"duration,omitempty"`
+	Title        string      `json:"title,omitempty"`
+	Artists      []string    `json:"artist,omitempty"`
+	Album        string      `json:"album,omitempty"`
+	AlbumArtists []string    `json:"albumartist,omitempty"`
+	Year         string      `json:"year,omitempty"`
+	Track        NoOf        `json:"track,omitempty"`
+	Disk         NoOf        `json:"disk,omitempty"`
+	Genres       []string    `json:"genre,omitempty"`
+	Images       []SongImage `json:"picture,omitempty"`
+	Duration     float64     `json:"duration,omitempty"`
 }
 
 type NoOf struct {
@@ -58,17 +58,20 @@ type UploadedSongMeta struct {
 
 type Playlist struct {
 	Version int `json:"version"`
-	Uploaded
+	*Uploaded
 	Name  string `json:"name"`
 	Songs []Song `json:"songs"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type uploader interface{}
+type uploader interface {
+	uploaded(BlockID) error
+}
 
 func (u *Uploaded) uploaded(id BlockID) error {
 	u.ID = id
 	u.UploaderID = getNodeID()
-	n.UploaderSig = []byte{} // TODO actually do this
+	u.UploaderSig = []byte{} // TODO actually do this
+	return nil
 }
