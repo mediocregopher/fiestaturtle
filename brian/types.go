@@ -1,7 +1,5 @@
 package main
 
-import "time"
-
 // Identifies a block in ipfs
 type BlockID string
 
@@ -11,34 +9,66 @@ type NodeID string
 // Most top level types will have this, it describes the identifier for the
 // object, who uploaded it, and a verification of those two facts
 type Uploaded struct {
-	ID          BlockID
-	UploaderID  NodeID
-	UploaderSig []byte
+	ID          BlockID `json:"id"`
+	UploaderID  NodeID  `json:"uploaderID"`
+	UploaderSig []byte  `json:"uploaderSig"`
 }
 
 type Song struct {
-	Version int
+	Version int `json:"version"`
 	Uploaded
-	Name        string
-	Artist      string
-	Album       string
-	ReleaseDate time.Time
+
+	SongMeta SongMeta `json:"meta"`
 
 	// If the song was uploaded this will be populated
-	UploadedSongMeta UploadedSongMeta `json:",omitempty"`
+	UploadedSongMeta UploadedSongMeta `json:"uploadedSongMeta,omitempty"`
 
 	// If the song is a reference to soundcloud or youtube or whatever, this
 	// will be populated
-	URL string `json:",omitempty"`
+	URL string `json:"url,omitempty"`
+}
+
+type SongMeta struct {
+	Title       string      `json:"title,omitempty"`
+	Artist      []string    `json:"artist,omitempty"`
+	Album       string      `json:"album,omitempty"`
+	AlbumArtist []string    `json:"albumartist,omitempty"`
+	Year        string      `json:"year,omitempty"`
+	Track       NoOf        `json:"track,omitempty"`
+	Disk        NoOf        `json:"disk,omitempty"`
+	Genre       []string    `json:"genre,omitempty"`
+	Picture     []SongImage `json:"picture,omitempty"`
+	Duration    float64     `json:"duration,omitempty"`
+}
+
+type NoOf struct {
+	No int `json:"no"`
+	Of int `json:"of,omitempty"`
+}
+
+type SongImage struct {
+	Format string  `json:"format"`
+	Data   []byte  `json:"data"` // only populated by marco when creating song, ID is populated in all other cases
+	ID     BlockID `json:"id"`
 }
 
 type UploadedSongMeta struct {
-	DataID  BlockID // BlockID that holds the actual mp3 data
-	ImageID BlockID // BlockID that may hold the image
+	DataID BlockID `json:"dataID"` // BlockID that holds the actual mp3 data
 }
 
 type Playlist struct {
-	Version int
+	Version int `json:"version"`
 	Uploaded
-	Songs []Song
+	Name  string `json:"name"`
+	Songs []Song `json:"songs"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type uploader interface{}
+
+func (u *Uploaded) uploaded(id BlockID) error {
+	u.ID = id
+	u.UploaderID = getNodeID()
+	n.UploaderSig = []byte{} // TODO actually do this
 }
