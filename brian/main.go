@@ -22,9 +22,6 @@ func main() {
 	}
 
 	http.Handle("/rpc", RPC())
-	go func() {
-		log.Fatal(http.ListenAndServe(":4567", nil))
-	}()
 	log.Info("listening on :4567")
-	select {}
+	log.Fatal(http.ListenAndServe("127.0.0.1:4567", nil))
 }

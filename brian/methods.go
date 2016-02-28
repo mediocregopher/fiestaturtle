@@ -25,7 +25,17 @@ func updateUser(fn func(*User)) (User, error) {
 	if err != nil && !os.IsNotExist(err) {
 		return u, err
 	}
+	if err := u.decrypt(); err != nil {
+		return u, err
+	}
 	fn(&u)
+	if err := u.encrypt(); err != nil {
+		return u, err
+	}
+
+	// Make super sure that we never store the user with UserPrivate set
+	u.UserPrivate = UserPrivate{}
+
 	_, err = putNS(&u)
 	return u, err
 }
@@ -154,11 +164,13 @@ type GetUserRes struct {
 func (_ Brian) GetUser(r *http.Request, args *GetUserArgs, res *GetUserRes) error {
 	var err error
 	if args.UserID == "" {
-		_, err = getNS(&res.User)
-	} else {
-		err = get(args.UserID, &res.User)
+		if _, err = getNS(&res.User); err != nil {
+			return err
+		}
+		return res.User.decrypt()
 	}
-	return err
+
+	return get(args.UserID, &res.User)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -195,6 +207,19 @@ func (_ Brian) DeletePlaylist(r *http.Request, args *DeletePlaylistArgs, res *st
 			newp = append(newp, p)
 		}
 		u.Playlists = newp
+	})
+	return err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type SetRichardsArgs struct {
+	Richards []Richard `json:"richards"`
+}
+
+func (_ Brian) SetRichards(r *http.Request, args *SetRichardsArgs, res *struct{}) error {
+	_, err := updateUser(func(u *User) {
+		u.UserPrivate.Richards = args.Richards
 	})
 	return err
 }

@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 // Identifies a block in ipfs
 type BlockID string
 
@@ -68,6 +70,17 @@ type User struct {
 	*Uploaded
 	Name      string     `json:"name"`
 	Playlists []Playlist `json:"playlists"` // Songs won't be filled in on these
+
+	UserPrivate    UserPrivate `json:"private"`
+	UserPrivateRaw []byte      `json:"privateRaw"`
+}
+
+type UserPrivate struct {
+	Richards []Richard
+}
+
+type Richard struct {
+	Addr string
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,4 +98,40 @@ func (u *Uploaded) sign() error {
 
 func (u *Uploaded) uploaded(id BlockID) {
 	u.ID = id
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (u *User) encrypt() error {
+	b, err := json.Marshal(u.UserPrivate)
+	if err != nil {
+		return err
+	}
+
+	benc, err := encrypt(b)
+	if err != nil {
+		return err
+	}
+
+	u.UserPrivateRaw = benc
+	u.UserPrivate = UserPrivate{}
+	return nil
+}
+
+func (u *User) decrypt() error {
+	if len(u.UserPrivateRaw) == 0 {
+		return nil
+	}
+
+	b, err := decrypt(u.UserPrivateRaw)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(b, &u.UserPrivate); err != nil {
+		return err
+	}
+
+	u.UserPrivateRaw = nil
+	return nil
 }

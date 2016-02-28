@@ -21,6 +21,7 @@ func init() {
 	}
 
 	os.Remove(nsFilePath())
+	os.Remove(keyFilePath())
 }
 
 func getUser(t *T) User {
@@ -154,4 +155,20 @@ func TestDeletePlaylist(t *T) {
 	for _, p := range u.Playlists {
 		assert.NotEqual(t, p1.ID, p)
 	}
+}
+
+func TestSetRichards(t *T) {
+	h := RPC()
+	args := SetRichardsArgs{
+		Richards: []Richard{
+			Richard{Addr: testutil.RandStr()},
+			Richard{Addr: testutil.RandStr()},
+			Richard{Addr: testutil.RandStr()},
+		},
+	}
+	err := rpcutil.JSONRPC2CallHandler(h, &struct{}{}, "Brian.SetRichards", &args)
+	require.Nil(t, err)
+
+	u := getUser(t)
+	assert.Equal(t, args.Richards, u.UserPrivate.Richards)
 }
