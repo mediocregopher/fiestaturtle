@@ -141,3 +141,17 @@ func TestSetUserName(t *T) {
 	u := getUser(t)
 	assert.Equal(t, args.Name, u.Name)
 }
+
+func TestDeletePlaylist(t *T) {
+	h := RPC()
+	p1 := randPlaylist(t)
+
+	args := DeletePlaylistArgs{PlaylistID: p1.ID}
+	err := rpcutil.JSONRPC2CallHandler(h, &struct{}{}, "Brian.DeletePlaylist", &args)
+	require.Nil(t, err)
+
+	u := getUser(t)
+	for _, p := range u.Playlists {
+		assert.NotEqual(t, p1.ID, p)
+	}
+}

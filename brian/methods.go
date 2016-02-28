@@ -178,3 +178,23 @@ func (_ Brian) SetUserName(r *http.Request, args *SetUserNameArgs, res *SetUserN
 	})
 	return err
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type DeletePlaylistArgs struct {
+	PlaylistID BlockID `json:"playlistID"`
+}
+
+func (_ Brian) DeletePlaylist(r *http.Request, args *DeletePlaylistArgs, res *struct{}) error {
+	_, err := updateUser(func(u *User) {
+		newp := make([]Playlist, 0, len(u.Playlists))
+		for _, p := range u.Playlists {
+			if p.ID == args.PlaylistID {
+				continue
+			}
+			newp = append(newp, p)
+		}
+		u.Playlists = newp
+	})
+	return err
+}
