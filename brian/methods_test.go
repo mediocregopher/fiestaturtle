@@ -129,3 +129,15 @@ func TestGetPlaylist(t *T) {
 	require.Nil(t, err)
 	assert.Equal(t, p, res.Playlist)
 }
+
+func TestSetUserName(t *T) {
+	h := RPC()
+	args := SetUserNameArgs{Name: testutil.RandStr()}
+	var res SetUserNameRes
+	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.SetUserName", &args)
+	require.Nil(t, err)
+	assert.Equal(t, args.Name, res.User.Name)
+
+	u := getUser(t)
+	assert.Equal(t, args.Name, u.Name)
+}

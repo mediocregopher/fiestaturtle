@@ -18,16 +18,16 @@ func RPC() http.Handler {
 	return s
 }
 
-func updateUser(fn func(*User)) error {
+func updateUser(fn func(*User)) (User, error) {
 	var u User
 	u.Uploaded = &Uploaded{}
 	_, err := getNS(&u)
 	if err != nil && !os.IsNotExist(err) {
-		return err
+		return u, err
 	}
 	fn(&u)
 	_, err = putNS(&u)
-	return err
+	return u, err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *Cr
 		return err
 	}
 
-	return updateUser(func(u *User) {
+	_, err := updateUser(func(u *User) {
 		p := res.Playlist
 		p.Songs = nil
 		if args.Replaces != "" {
@@ -122,6 +122,7 @@ func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *Cr
 
 		u.Playlists = append(u.Playlists, p)
 	})
+	return err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,5 +158,23 @@ func (_ Brian) GetUser(r *http.Request, args *GetUserArgs, res *GetUserRes) erro
 	} else {
 		err = get(args.UserID, &res.User)
 	}
+	return err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type SetUserNameArgs struct {
+	Name string `json:"name"`
+}
+
+type SetUserNameRes struct {
+	User User `json:"user"`
+}
+
+func (_ Brian) SetUserName(r *http.Request, args *SetUserNameArgs, res *SetUserNameRes) error {
+	var err error
+	res.User, err = updateUser(func(u *User) {
+		u.Name = args.Name
+	})
 	return err
 }
