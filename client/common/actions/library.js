@@ -17,6 +17,13 @@ export function addSongToPlaylist (song: Song, playlist: Playlist): TypedAsyncAc
   }
 }
 
+export function addSongToLibrary (song: Song): TypedAsyncAction<SwapPlaylist> {
+  return (dispatch, getState) => {
+    const playlist = getState().library.playlists.filter(p => p.name === 'Library')[0]
+    return dispatch(addSongToPlaylist(song, playlist))
+  }
+}
+
 export function removeFromPlaylist (song: Song, playlist: Playlist): TypedAsyncAction<SwapPlaylist> {
   return dispatch => {
     const nextPlaylist = {...playlist, songs: playlist.songs.filter(s => s !== song)}

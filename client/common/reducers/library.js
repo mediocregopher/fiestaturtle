@@ -111,7 +111,7 @@ export default function (state: LibraryState = initialState, action: LibraryActi
         const {oldPlaylist, playlist} = action.payload
         return {
           ...state,
-          playlists: state.playlists.map(p => p === oldPlaylist ? playlist : p)
+          playlists: state.playlists.map(p => p.id === oldPlaylist.id ? playlist : p)
         }
       }
 

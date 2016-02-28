@@ -21,7 +21,14 @@ import type {Playlist, Song} from '../constants/types/ft'
 import ReactList from 'react-list'
 
 export default class Library extends Component {
+  props: {
+    onSearchEnter: (q: string) => void,
+    searchResults: Array<any>,
+    onItemClick: (i: number) => void
+  };
+
   render () {
+    console.log('songs', this.props.songResults)
     return (
       <div style={{
         marginLeft: 'auto',
@@ -31,36 +38,37 @@ export default class Library extends Component {
 
         <div style={{marginTop: 20}}>
         <TextField
-          hintText="Richard's addr"
+          floatingLabelText="Search Query"
           ref='input'
           onEnterKeyDown={() => {
             const v = this.refs.input && this.refs.input.getValue()
-            const newRichardServerList = this.props.richardServers.concat({addr: v})
-            this.props.onRichardServerChange(newRichardServerList)
+            this.props.onSearchEnter(v)
           }}
-          floatingLabelText="Richard's addr" />
+          />
         </div>
 
-        <div style={{marginTop: 20}}>
-          <span style={{fontSize: 42, textAlign: 'center'}}> Manage Richards </span>
+        {this.props.songResults.length > 0 &&
+          <div style={{marginTop: 20}}>
+            <span style={{fontSize: 42, textAlign: 'center'}}> Search Results </span>
 
-          <SweetTable
-            icons={[
-              ['delete', i => {
-                const rs = this.props.richardServers[i]
-                const newRichardServerList = this.props.richardServers.filter(r => r !== rs)
-                this.props.onRichardServerChange(newRichardServerList)
-              }]
-            ]}
-            onClick={i => {}}
-            headers={[
-              ['Address', () => {}]
-            ]}
-            colFormatter={({addr}) => {
-              return [addr]
-            }}
-            items={this.props.richardServers || []} />
-        </div>
+            <SweetTable
+              icons={[
+                ['library_add', i => {
+                  const s = this.props.songResults[i]
+                  this.props.onSongAdd(s)
+                }]
+              ]}
+              onClick={i => {}}
+              headers={[
+                ['title', () => {}],
+                ['artist', () => {}]
+              ]}
+              colFormatter={({meta: {title, artist}}) => {
+                return [title, artist]
+              }}
+              items={this.props.songResults || []} />
+          </div>
+        }
 
         <FlatButton secondary label={'Back'} onClick={this.props.onBack} />
       </div>

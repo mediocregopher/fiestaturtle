@@ -183,7 +183,6 @@ html {
 
 body * {
     font-family: 'Lato';
-    overflow: hidden;
 }
 
 #app {

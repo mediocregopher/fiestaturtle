@@ -71,6 +71,7 @@ class Upload extends Component {
         <span style={{fontSize: 20, lineHeight: '30px', marginTop: 20}}>or drag n' drop anywhere on this page</span>
 
         <FileProcessor
+          multiple
           ref='myFileInput'
           onFileSelect={(e, files) => this.handleFileSelect(e, files)}>
           <RaisedButton primary label='Open Local File' style={{marginTop: 40}}

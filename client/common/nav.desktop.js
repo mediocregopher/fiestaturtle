@@ -9,10 +9,12 @@ import {getUser} from './actions/library'
 import RaisedButton from 'material-ui/lib/raised-button'
 import Divider from 'material-ui/lib/divider'
 
+import {addSongToLibrary} from './actions/library'
 
 import Upload from './upload/index.desktop'
 import Library from './library/index.desktop'
 import Richard from './richard/index.desktop'
+import Search from './search/index.desktop'
 
 import {rpc} from './util/rpc'
 
@@ -32,13 +34,13 @@ class Nav extends Component {
   componentDidMount () {
     this.props.getUser().then(u => {
       console.log('here with user', u)
-      this.setState({richardServers: u.private.richards || [{addr: '1234'}]})
+      this.setState({richardServers: u.private.richards || []})
     })
   }
 
   constructor (props) {
     super(props)
-    this.state = {richardServers: []}
+    this.state = {richardServers: [], searchResults: null}
   }
 
   render () {
@@ -47,21 +49,47 @@ class Nav extends Component {
     const {pathSoFar, navUp} = this.props
     const firstPath = pathSoFar.first() && pathSoFar.first().get('path')
     console.log('path', pathSoFar)
+    const searchResults = this.state.searchResults || {items: {song: [], playlist: [], user: []}}
+    const songResults = searchResults.items.song || []
+    const playlistResult = searchResults.items.playlist || []
+    const userResult = searchResults.items.user || []
 
     if (firstPath === 'search') {
-      return <div path={pathSoFar.rest()} onClick={navUp}> to search </div>
+      return <Search path={pathSoFar.rest()}
+        songResults={songResults}
+        playlistResult={playlistResult}
+        userResult={userResult}
+        onSongAdd={(s) => {console.log('add song', s); this.props.addSongToLibrary(s)}}
+        onSearchEnter={(query) => {
+          rpc('Search', {query}).then(({result, error}) => {
+            if (error) {
+              console.error('error in searching', error)
+              return Promise.reject()
+            }
+            return Promise.resolve(result)
+          }).then(searchResults => {
+            console.log('search results', searchResults)
+            this.setState({searchResults})
+          })
+        }}
+        onBack={navUp} />
     } else if (firstPath === 'upload') {
       return <Upload path={pathSoFar.rest()} onClick={navUp}/>
     } else if (firstPath === 'richard') {
       return <Richard
               onRichardServerChange={(newRichardServerList) => {
                 // TODO
-                // rpc('SetRichards', {richards: newRichardServerList})
-                // rpc('GetRichardServers', {})
-                
-                this.props.getUser().then(u => {
-                  console.log('here with user', u)
-                  this.setState({richardServers: u.private.richards})
+                rpc('SetRichards', {richards: newRichardServerList}).then(({result, error}) => {
+                  if (error) {
+                    console.error('error in setting richards', error)
+                    return Promise.reject()
+                  }
+                  return Promise.resolve(result)
+                }).then(() => {
+                  this.props.getUser().then(u => {
+                    console.log('here with user', u)
+                    this.setState({richardServers: u.private.richards || []})
+                  })
                 })
               }}
               richardServers={this.state.richardServers}
@@ -73,7 +101,7 @@ class Nav extends Component {
 
       <div style={{...globalStyles.flexBoxColumn, marginTop: 40, marginLeft: 'auto', marginRight: 'auto', alignItems: 'center'}}>
 
-        <div id={'banner'} style={{marginLeft: 80, marginRight: 80}}>
+        <div id={'banner'} style={{marginLeft: 80, marginRight: 80, minHeight: 110}}>
           <div style={{fontStyle: 'italic', fontSize: 32, textAlign: 'center', marginTop: 20, marginBottom: -88, zIndex: 10, position: 'relative'}}>¡Fiesta Turtle!</div>
           <div className={'fill'} dangerouslySetInnerHTML={{__html: water}}/>
         </div>
@@ -106,6 +134,7 @@ export default connect(
     return {route: state.router.get('uri'), pathSoFar}
   },
   (dispatch) => ({
+    addSongToLibrary: (s) => dispatch(addSongToLibrary(s)),
     onUpload: () => dispatch(routeAppend('upload')),
     onRichard: () => dispatch(routeAppend('richard')),
     onSearch: () => dispatch(routeAppend('search')),
