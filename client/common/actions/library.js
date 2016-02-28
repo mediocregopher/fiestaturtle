@@ -57,7 +57,11 @@ export function deletePlaylist (playlist: Playlist): TypedAsyncAction<DeletePlay
 export function playSong (song: Song): TypedAsyncAction<DeletePlaylist> {
   return dispatch => {
     // TODO get song url
-    dispatch({type: 'library:playSong', payload: {url: ''}})
+
+    const id = song.uploadedSongMeta.dataID
+    const url = `http://localhost:4567/ipfs/${id}`
+
+    dispatch({type: 'library:playSong', payload: {url}})
   }
 }
 
