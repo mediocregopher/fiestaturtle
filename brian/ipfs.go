@@ -11,6 +11,7 @@ import (
 
 	"github.com/ipfs/go-ipfs/core/coreunix"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
+	"github.com/mediocregopher/fiestaturtle/fiestatypes"
 	"golang.org/x/net/context"
 )
 
@@ -23,7 +24,7 @@ func nsFilePath() string {
 	return path.Join(n.rdir, "ns")
 }
 
-func get(id BlockID, res interface{}) error {
+func get(id fiestatypes.BlockID, res interface{}) error {
 	var err error
 	n.with(func() {
 		var r *uio.DagReader
@@ -36,16 +37,16 @@ func get(id BlockID, res interface{}) error {
 			return
 		}
 
-		if ut, ok := res.(uploader); ok {
-			ut.uploaded(id)
+		if ut, ok := res.(fiestatypes.Uploader); ok {
+			ut.SetID(id)
 		}
 	})
 	return err
 }
 
-func put(res interface{}) (BlockID, error) {
-	if ut, ok := res.(uploader); ok {
-		if err := ut.sign(); err != nil {
+func put(res interface{}) (fiestatypes.BlockID, error) {
+	if ut, ok := res.(fiestatypes.Uploader); ok {
+		if err := signUploader(ut); err != nil {
 			return "", err
 		}
 	}
@@ -60,23 +61,23 @@ func put(res interface{}) (BlockID, error) {
 		return "", err
 	}
 
-	if ut, ok := res.(uploader); ok {
-		ut.uploaded(id)
+	if ut, ok := res.(fiestatypes.Uploader); ok {
+		ut.SetID(id)
 	}
 
 	return id, nil
 }
 
-func putRaw(r io.Reader) (BlockID, error) {
+func putRaw(r io.Reader) (fiestatypes.BlockID, error) {
 	var braw string
 	var err error
 	n.with(func() {
 		braw, err = coreunix.Add(n.nd, r)
 	})
-	return BlockID(braw), err
+	return fiestatypes.BlockID(braw), err
 }
 
-func putNS(res interface{}) (BlockID, error) {
+func putNS(res interface{}) (fiestatypes.BlockID, error) {
 	id, err := put(res)
 	if err != nil {
 		return "", err
@@ -85,45 +86,45 @@ func putNS(res interface{}) (BlockID, error) {
 	return id, ioutil.WriteFile(nsFilePath(), []byte(id), 0644)
 }
 
-func getNodeID() NodeID {
-	var nid NodeID
+func getNodeID() fiestatypes.NodeID {
+	var nid fiestatypes.NodeID
 	n.with(func() {
-		nid = NodeID(n.nd.Identity.Pretty())
+		nid = fiestatypes.NodeID(n.nd.Identity.Pretty())
 	})
 	return nid
 }
 
-func getNS(res interface{}) (BlockID, error) {
+func getNS(res interface{}) (fiestatypes.BlockID, error) {
 	nsb, err := ioutil.ReadFile(nsFilePath())
 	if err != nil {
 		return "", err
 	}
 
-	id := BlockID(nsb)
+	id := fiestatypes.BlockID(nsb)
 	err = get(id, res)
 	return id, err
 }
 
-func getNSUser() (User, error) {
-	var u User
-	u.Uploaded = &Uploaded{}
+func getNSUser() (fiestatypes.User, error) {
+	var u fiestatypes.User
+	u.Uploaded = &fiestatypes.Uploaded{}
 	_, err := getNS(&u)
 	if err != nil && !os.IsNotExist(err) {
 		return u, err
 	}
-	if err := u.decrypt(); err != nil {
+	if err := decryptUser(&u); err != nil {
 		return u, err
 	}
 	return u, nil
 }
 
-func putNSUser(u User) (User, error) {
-	if err := u.encrypt(); err != nil {
+func putNSUser(u fiestatypes.User) (fiestatypes.User, error) {
+	if err := encryptUser(&u); err != nil {
 		return u, err
 	}
 
 	// Make super sure that we never store the user with UserPrivate set
-	u.UserPrivate = UserPrivate{}
+	u.UserPrivate = fiestatypes.UserPrivate{}
 
 	_, err := putNS(&u)
 	return u, err

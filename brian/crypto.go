@@ -4,10 +4,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/mediocregopher/fiestaturtle/fiestatypes"
 )
 
 func keyFilePath() string {
@@ -75,4 +78,46 @@ func decrypt(b []byte) ([]byte, error) {
 	b = b[noncel:]
 	out := make([]byte, len(b))
 	return aead.Open(out[:0], nonce, b, nil)
+}
+
+func encryptUser(u *fiestatypes.User) error {
+	b, err := json.Marshal(u.UserPrivate)
+	if err != nil {
+		return err
+	}
+
+	benc, err := encrypt(b)
+	if err != nil {
+		return err
+	}
+
+	u.UserPrivateRaw = benc
+	u.UserPrivate = fiestatypes.UserPrivate{}
+	return nil
+}
+
+func decryptUser(u *fiestatypes.User) error {
+	if len(u.UserPrivateRaw) == 0 {
+		return nil
+	}
+
+	b, err := decrypt(u.UserPrivateRaw)
+	if err != nil {
+		return err
+	}
+
+	if err := json.Unmarshal(b, &u.UserPrivate); err != nil {
+		return err
+	}
+
+	u.UserPrivateRaw = nil
+	return nil
+}
+
+func signUploader(up fiestatypes.Uploader) error {
+	u := up.Get()
+	u.UploaderID = getNodeID()
+	u.UploaderSig = []byte{} // TODO actually do this
+	up.Set(u)
+	return nil
 }

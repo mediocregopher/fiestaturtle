@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
+	"github.com/mediocregopher/fiestaturtle/fiestatypes"
 )
 
 type Brian struct{}
@@ -18,7 +19,7 @@ func RPC() http.Handler {
 	return s
 }
 
-func updateUser(fn func(*User)) (User, error) {
+func updateUser(fn func(*fiestatypes.User)) (fiestatypes.User, error) {
 	u, err := getNSUser()
 	if err != nil {
 		return u, err
@@ -30,14 +31,14 @@ func updateUser(fn func(*User)) (User, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type UploadSongArgs struct {
-	Song Song `json:"song"`
+	Song fiestatypes.Song `json:"song"`
 
 	// optional, not needed if Song is using a URL
 	SongPath string `json:"songPath"`
 }
 
 type UploadSongRes struct {
-	Song Song `json:"song"`
+	Song fiestatypes.Song `json:"song"`
 }
 
 func (_ Brian) UploadSongData(r *http.Request, args *UploadSongArgs, res *UploadSongRes) error {
@@ -53,12 +54,12 @@ func (_ Brian) UploadSongData(r *http.Request, args *UploadSongArgs, res *Upload
 		return err
 	}
 
-	res.Song.Uploaded = &Uploaded{}
+	res.Song.Uploaded = &fiestatypes.Uploaded{}
 	_, err = put(&res.Song)
 	return err
 }
 
-func uploadSong(s *Song, path string) error {
+func uploadSong(s *fiestatypes.Song, path string) error {
 	songF, err := os.Open(path)
 	if err != nil {
 		return err
@@ -74,7 +75,7 @@ func uploadSong(s *Song, path string) error {
 	return nil
 }
 
-func uploadSongImgs(s *Song) error {
+func uploadSongImgs(s *fiestatypes.Song) error {
 	for i, img := range s.SongMeta.Images {
 		imgID, err := putRaw(bytes.NewBuffer(img.Data))
 		if err != nil {
@@ -90,22 +91,22 @@ func uploadSongImgs(s *Song) error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type CreatePlaylistArgs struct {
-	Playlist Playlist `json:"playlist"`
-	Replaces BlockID  `json:"replaces"`
+	Playlist fiestatypes.Playlist `json:"playlist"`
+	Replaces fiestatypes.BlockID  `json:"replaces"`
 }
 
 type CreatePlaylistRes struct {
-	Playlist Playlist `json:"playlist"`
+	Playlist fiestatypes.Playlist `json:"playlist"`
 }
 
 func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *CreatePlaylistRes) error {
 	res.Playlist = args.Playlist
-	res.Playlist.Uploaded = &Uploaded{}
+	res.Playlist.Uploaded = &fiestatypes.Uploaded{}
 	if _, err := put(&res.Playlist); err != nil {
 		return err
 	}
 
-	_, err := updateUser(func(u *User) {
+	_, err := updateUser(func(u *fiestatypes.User) {
 		p := res.Playlist
 		p.Songs = nil
 		if args.Replaces != "" {
@@ -125,15 +126,15 @@ func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *Cr
 ////////////////////////////////////////////////////////////////////////////////
 
 type GetPlaylistArgs struct {
-	PlaylistID BlockID `json:"playlistID"`
+	PlaylistID fiestatypes.BlockID `json:"playlistID"`
 }
 
 type GetPlaylistRes struct {
-	Playlist Playlist `json:"playlist"`
+	Playlist fiestatypes.Playlist `json:"playlist"`
 }
 
 func (_ Brian) GetPlaylist(r *http.Request, args *GetPlaylistArgs, res *GetPlaylistRes) error {
-	res.Playlist.Uploaded = &Uploaded{}
+	res.Playlist.Uploaded = &fiestatypes.Uploaded{}
 	return get(args.PlaylistID, &res.Playlist)
 }
 
@@ -141,11 +142,11 @@ func (_ Brian) GetPlaylist(r *http.Request, args *GetPlaylistArgs, res *GetPlayl
 
 type GetUserArgs struct {
 	// optional, returns this node's user if not set
-	UserID BlockID `json:"userID"`
+	UserID fiestatypes.BlockID `json:"userID"`
 }
 
 type GetUserRes struct {
-	User User `json:"user"`
+	User fiestatypes.User `json:"user"`
 }
 
 func (_ Brian) GetUser(r *http.Request, args *GetUserArgs, res *GetUserRes) error {
@@ -165,12 +166,12 @@ type SetUserNameArgs struct {
 }
 
 type SetUserNameRes struct {
-	User User `json:"user"`
+	User fiestatypes.User `json:"user"`
 }
 
 func (_ Brian) SetUserName(r *http.Request, args *SetUserNameArgs, res *SetUserNameRes) error {
 	var err error
-	res.User, err = updateUser(func(u *User) {
+	res.User, err = updateUser(func(u *fiestatypes.User) {
 		u.Name = args.Name
 	})
 	return err
@@ -179,12 +180,12 @@ func (_ Brian) SetUserName(r *http.Request, args *SetUserNameArgs, res *SetUserN
 ////////////////////////////////////////////////////////////////////////////////
 
 type DeletePlaylistArgs struct {
-	PlaylistID BlockID `json:"playlistID"`
+	PlaylistID fiestatypes.BlockID `json:"playlistID"`
 }
 
 func (_ Brian) DeletePlaylist(r *http.Request, args *DeletePlaylistArgs, res *struct{}) error {
-	_, err := updateUser(func(u *User) {
-		newp := make([]Playlist, 0, len(u.Playlists))
+	_, err := updateUser(func(u *fiestatypes.User) {
+		newp := make([]fiestatypes.Playlist, 0, len(u.Playlists))
 		for _, p := range u.Playlists {
 			if p.ID == args.PlaylistID {
 				continue
@@ -199,11 +200,11 @@ func (_ Brian) DeletePlaylist(r *http.Request, args *DeletePlaylistArgs, res *st
 ////////////////////////////////////////////////////////////////////////////////
 
 type SetRichardsArgs struct {
-	Richards []Richard `json:"richards"`
+	Richards []fiestatypes.Richard `json:"richards"`
 }
 
 func (_ Brian) SetRichards(r *http.Request, args *SetRichardsArgs, res *struct{}) error {
-	_, err := updateUser(func(u *User) {
+	_, err := updateUser(func(u *fiestatypes.User) {
 		u.UserPrivate.Richards = args.Richards
 	})
 	return err

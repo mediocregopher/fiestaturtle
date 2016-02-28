@@ -9,6 +9,7 @@ import (
 
 	"github.com/levenlabs/golib/rpcutil"
 	"github.com/levenlabs/golib/testutil"
+	"github.com/mediocregopher/fiestaturtle/fiestatypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,7 +25,7 @@ func init() {
 	os.Remove(keyFilePath())
 }
 
-func getUser(t *T) User {
+func getUser(t *T) fiestatypes.User {
 	h := RPC()
 	args := GetUserArgs{}
 	res := GetUserRes{}
@@ -33,7 +34,7 @@ func getUser(t *T) User {
 	return res.User
 }
 
-func randSong(t *T) Song {
+func randSong(t *T) fiestatypes.Song {
 	h := RPC()
 	songContent := []byte(testutil.RandStr())
 	imgContent := []byte(testutil.RandStr())
@@ -48,10 +49,10 @@ func randSong(t *T) Song {
 	require.Nil(t, err)
 	songF.Close()
 
-	s := Song{
-		SongMeta: SongMeta{
+	s := fiestatypes.Song{
+		SongMeta: fiestatypes.SongMeta{
 			Title: testutil.RandStr(),
-			Images: []SongImage{
+			Images: []fiestatypes.SongImage{
 				{
 					Data: imgContent,
 				},
@@ -80,11 +81,11 @@ func TestUploadSongData(t *T) {
 	assert.NotEmpty(t, s.SongMeta.Images[0].ID)
 }
 
-func randPlaylist(t *T) Playlist {
+func randPlaylist(t *T) fiestatypes.Playlist {
 	h := RPC()
-	p := Playlist{
+	p := fiestatypes.Playlist{
 		Name: testutil.RandStr(),
-		Songs: []Song{
+		Songs: []fiestatypes.Song{
 			randSong(t),
 			randSong(t),
 			randSong(t),
@@ -160,10 +161,10 @@ func TestDeletePlaylist(t *T) {
 func TestSetRichards(t *T) {
 	h := RPC()
 	args := SetRichardsArgs{
-		Richards: []Richard{
-			Richard{Addr: testutil.RandStr()},
-			Richard{Addr: testutil.RandStr()},
-			Richard{Addr: testutil.RandStr()},
+		Richards: []fiestatypes.Richard{
+			{Addr: testutil.RandStr()},
+			{Addr: testutil.RandStr()},
+			{Addr: testutil.RandStr()},
 		},
 	}
 	err := rpcutil.JSONRPC2CallHandler(h, &struct{}{}, "Brian.SetRichards", &args)
