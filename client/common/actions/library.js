@@ -54,8 +54,10 @@ export function deletePlaylist (playlist: Playlist): TypedAsyncAction<DeletePlay
 
 
 // TODO
-export function playSong (playlist: Playlist): TypedAsyncAction<DeletePlaylist> {
+export function playSong (song: Song): TypedAsyncAction<DeletePlaylist> {
   return dispatch => {
+    // TODO get song url
+    dispatch({type: 'library:playSong', payload: {url: ''}})
   }
 }
 

@@ -58,10 +58,12 @@ const dummyPlaylists: Array<Playlist> = [
 
 export type LibraryState = {
   playlists: Array<Playlist>,
+  nowPlayingSourceUrl: ?string,
   errorMessage: ?string
 }
 
 const initialState: LibraryState = {
+  nowPlayingSourceUrl: null,
   playlists: dummyPlaylists,
   errorMessage: null
 }
@@ -124,6 +126,20 @@ export default function (state: LibraryState = initialState, action: LibraryActi
         return {
           ...state,
           playlists: playlists.map(p => p.songs ? p : {...p, songs: []})
+        }
+      }
+
+    case 'library:playSong':
+      if (action.error) {
+        return {
+          ...state,
+          errorMessage: action.payload.error
+        }
+      } else {
+        const {playlists} = action.payload
+        return {
+          ...state,
+          nowPlayingSourceUrl: action.payload.url
         }
       }
 

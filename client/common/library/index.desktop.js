@@ -11,6 +11,8 @@ import TextField from 'material-ui/lib/text-field';
 import {bindActionCreators} from 'redux'
 import Divider from 'material-ui/lib/divider'
 
+import Player from './player.desktop'
+
 import SweetTable from '../table.desktop'
 
 import {deleteSongFromLibrary, createPlaylist, addSongToPlaylist, removeFromPlaylist, deletePlaylist, playSong, playPlaylist} from '../actions/library'
@@ -42,40 +44,6 @@ class Library extends Component {
   constructor (props: any) {
     super(props)
     this.state = {openedPlaylistWindow: false, playlistName: '', sortedBy: 'title', sortedByInverse: false, showPlaylistsDialog: false, songsToAdd: []}
-  }
-
-  renderItem (song, key) {
-    const colStyle = {flex: 1, overflow: 'scroll'}
-    return (
-      <div
-        style={{...globalStyles.clickable, ...globalStyles.noSelect}} key={key}>
-        <MenuItem innerDivStyle={{paddingRight: 0}} onTouchTap={this.props.playSong}>
-          <div style={{display: 'flex'}}>
-            <span style={colStyle}>{song.meta.title}</span>
-            <span style={colStyle}>{song.meta.artist}</span>
-            <span style={colStyle}>{song.meta.album}</span>
-            <span style={colStyle}>{song.meta.genre}</span>
-            <div style={{width: 50, position: 'relative'}}>
-              <FlatButton style={{margin: 0, padding: 0, height: 50, width: 20, flex:1}} onClick={() => {}}>
-                <i onClick={() => this.promptAddSongToPlaylist(song)} className="material-icons" style={{position: 'relative', right: 18, top: 5}}>library_music</i>
-              </FlatButton>
-            </div>
-          </div>
-
-        </MenuItem>
-      </div>
-    )
-  }
-
-  renderPlaylist (playlist, key) {
-    return (
-      <div
-        style={{...globalStyles.clickable, ...globalStyles.noSelect}} key={key}>
-        <MenuItem primaryText={playlist.name}
-          onTouchTap={this.props.playPlaylist}
-        />
-      </div>
-    )
   }
 
   cancelNewPlaylist () {
@@ -145,7 +113,6 @@ class Library extends Component {
           colFormatter={({meta: {title, artist, album, genre}}) => [title, artist, album, genre]}
           items={songs} />
 
-        <Divider/>
         <span style={{fontSize: 42, textAlign: 'center'}}> Playlists </span>
         <SweetTable
           icons={[]}
@@ -155,13 +122,19 @@ class Library extends Component {
           items={playlists}
          />
 
-        <div style={{marginTop: 'auto', alignSelf: 'flex-end', overflow: 'visible',
-          marginRight: 20,
-          marginBottom: 20,
-        }}>
-          <FloatingActionButton onClick={() => {this.setState({openedPlaylistWindow: true})}}>
-            <ContentAdd />
-          </FloatingActionButton>
+        <div style={{...globalStyles.flexBoxRow, marginTop: 'auto'}}>
+          <div style={{flex: 2, overflow: 'visible'}}>
+            <Player/>
+          </div>
+          <div style={{marginTop: 'auto', marginLeft: 'auto', overflow: 'visible',
+            marginRight: 20,
+            marginBottom: 20,
+          }}>
+            <FloatingActionButton onClick={() => {this.setState({openedPlaylistWindow: true})}}>
+              <ContentAdd />
+            </FloatingActionButton>
+          </div>
+        </div>
           <div>
           <Dialog
             title="Name your new playlist"
@@ -200,7 +173,6 @@ class Library extends Component {
             </div>
           </Dialog>
           </div>
-        </div>
       </div>
     )
   }
