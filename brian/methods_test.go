@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	. "testing"
+
+	logging "gx/ipfs/Qmazh5oNUVsDZTs2g59rq8aYQqwpss8tcUWQzor5sCCEuH/go-log"
 
 	"github.com/levenlabs/golib/rpcutil"
 	"github.com/levenlabs/golib/testutil"
@@ -14,13 +15,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var log = logging.Logger("brian")
+
 func init() {
 	// TODO initialize a new ipfs for testing
 
 	var err error
 	n, err = newNode("~/.ipfs")
 	if err != nil {
-		log.Printf("newNode error: %s", err)
+		log.Fatalf("newNode error: %s", err)
 	}
 }
 

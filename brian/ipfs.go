@@ -4,20 +4,25 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"io/ioutil"
+	"path"
 	"time"
 
-	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreunix"
 	uio "github.com/ipfs/go-ipfs/unixfs/io"
 	"golang.org/x/net/context"
 )
 
+func newCtx() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	return ctx
+}
+
 func get(id BlockID, res interface{}) error {
 	var err error
-	n.with(func(nd *core.IpfsNode) {
-		ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	n.with(func() {
 		var r *uio.DagReader
-		if r, err = coreunix.Cat(ctx, nd, string(id)); err != nil {
+		if r, err = coreunix.Cat(newCtx(), n.nd, string(id)); err != nil {
 			return
 		}
 		defer r.Close()
@@ -60,16 +65,36 @@ func put(res interface{}) (BlockID, error) {
 func putRaw(r io.Reader) (BlockID, error) {
 	var braw string
 	var err error
-	n.with(func(nd *core.IpfsNode) {
-		braw, err = coreunix.Add(nd, r)
+	n.with(func() {
+		braw, err = coreunix.Add(n.nd, r)
 	})
 	return BlockID(braw), err
 }
 
+func putNS(res interface{}) (BlockID, error) {
+	id, err := put(res)
+	if err != nil {
+		return "", err
+	}
+
+	return id, ioutil.WriteFile(path.Join(n.rdir, "ns"), []byte(id), 0644)
+}
+
 func getNodeID() NodeID {
 	var nid NodeID
-	n.with(func(nd *core.IpfsNode) {
-		nid = NodeID(nd.Identity.Pretty())
+	n.with(func() {
+		nid = NodeID(n.nd.Identity.Pretty())
 	})
 	return nid
+}
+
+func getNS(res interface{}) (BlockID, error) {
+	nsb, err := ioutil.ReadFile(path.Join(n.rdir, "ns"))
+	if err != nil {
+		return "", err
+	}
+
+	id := BlockID(nsb)
+	err = get(id, res)
+	return id, err
 }

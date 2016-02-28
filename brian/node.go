@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"sync"
 
 	"github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
@@ -9,36 +9,53 @@ import (
 )
 
 type node struct {
-	ch chan *core.IpfsNode
+	sync.Mutex
+	nd   *core.IpfsNode
+	rdir string
 }
 
-func newNode(dir string) (node, error) {
+func newNode(live bool) (node, error) {
+	log.Infof("finding repo")
+	dir, err := fsrepo.BestKnownPath()
+	if err != nil {
+		return node{}, err
+	}
+
+	log.Infof("opening repo at %q", dir)
 	r, err := fsrepo.Open(dir)
 	if err != nil {
 		return node{}, err
 	}
 
 	cfg := &core.BuildCfg{
-		Repo: r,
-		//Online: true,
+		Repo:   r,
+		Online: live,
 	}
 
-	log.Printf("initializing node object")
+	log.Infof("initializing node object")
 	nd, err := core.NewNode(context.Background(), cfg)
 	if err != nil {
 		return node{}, err
 	}
-	log.Printf("done initializing")
+	log.Infof("done initializing")
+
+	if !live {
+		log.Infof("setting up offline routing")
+		if err := nd.SetupOfflineRouting(); err != nil {
+			return node{}, err
+		}
+		log.Infof("done setting up offline routing")
+	}
 
 	n := node{
-		ch: make(chan *core.IpfsNode, 1),
+		nd:   nd,
+		rdir: dir,
 	}
-	n.ch <- nd
 	return n, nil
 }
 
-func (n node) with(fn func(*core.IpfsNode)) {
-	nd := <-n.ch
-	fn(nd)
-	n.ch <- nd
+func (n node) with(fn func()) {
+	n.Lock()
+	fn()
+	n.Unlock()
 }
