@@ -74,11 +74,11 @@ type User struct {
 }
 
 type UserPrivate struct {
-	Richards []Richard
+	Richards []Richard `json:"richards"`
 }
 
 type Richard struct {
-	Addr string
+	Addr string `json:"addr"`
 }
 
 ////////////////////////////////////////////////////////////////////////////////
