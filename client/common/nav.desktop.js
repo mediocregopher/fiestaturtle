@@ -12,6 +12,9 @@ import Divider from 'material-ui/lib/divider'
 
 import Upload from './upload/index.desktop'
 import Library from './library/index.desktop'
+import Richard from './richard/index.desktop'
+
+import {rpc} from './util/rpc'
 
 type Props = {
   username: ?string,
@@ -27,7 +30,15 @@ const water = `
 
 class Nav extends Component {
   componentDidMount () {
-    this.props.getUser()
+    this.props.getUser().then(u => {
+      console.log('here with user', u)
+      this.setState({richardServers: u.private.richards || [{addr: '1234'}]})
+    })
+  }
+
+  constructor (props) {
+    super(props)
+    this.state = {richardServers: []}
   }
 
   render () {
@@ -41,6 +52,20 @@ class Nav extends Component {
       return <div path={pathSoFar.rest()} onClick={navUp}> to search </div>
     } else if (firstPath === 'upload') {
       return <Upload path={pathSoFar.rest()} onClick={navUp}/>
+    } else if (firstPath === 'richard') {
+      return <Richard
+              onRichardServerChange={(newRichardServerList) => {
+                // TODO
+                // rpc('SetRichards', {richards: newRichardServerList})
+                // rpc('GetRichardServers', {})
+                
+                this.props.getUser().then(u => {
+                  console.log('here with user', u)
+                  this.setState({richardServers: u.private.richards})
+                })
+              }}
+              richardServers={this.state.richardServers}
+              path={pathSoFar.rest()} onBack={navUp}/>
     }
 
     return (
@@ -53,12 +78,15 @@ class Nav extends Component {
           <div className={'fill'} dangerouslySetInnerHTML={{__html: water}}/>
         </div>
 
-        <div style={{...globalStyles.flexBoxRow, justifyContent: 'space-around', marginTop: 20, minWidth: 280}}>
+        <div style={{...globalStyles.flexBoxRow, justifyContent: 'space-around', marginTop: 20, minWidth: 380}}>
           <div style={globalStyles.flexBoxColumn}>
             <RaisedButton label='Search' primary onClick={this.props.onSearch}/>
           </div>
           <div style={globalStyles.flexBoxColumn}>
             <RaisedButton label='Upload' secondary onClick={this.props.onUpload}/>
+          </div>
+          <div style={globalStyles.flexBoxColumn}>
+            <RaisedButton label='Manage Richards' secondary onClick={this.props.onRichard}/>
           </div>
         </div>
 
@@ -79,6 +107,7 @@ export default connect(
   },
   (dispatch) => ({
     onUpload: () => dispatch(routeAppend('upload')),
+    onRichard: () => dispatch(routeAppend('richard')),
     onSearch: () => dispatch(routeAppend('search')),
     getUser: () => dispatch(getUser()),
     navUp: () => dispatch(navigateUp())

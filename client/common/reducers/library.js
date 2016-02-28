@@ -1,6 +1,6 @@
 // @flow
 
-import {Set} from 'immutable'
+import Immutable, {Set} from 'immutable'
 
 import * as Constants from '../constants/library'
 import type {Song, Playlist} from '../constants/types/ft'
@@ -69,7 +69,7 @@ const initialState: LibraryState = {
 }
 
 export function deriveAllSongs (playlists: Array<Playlist>): Array<Song> {
-  return playlists.reduce((acc, p) => acc.union(p.songs), Set()).toJS()
+  return playlists.map(p => Immutable.fromJS(p)).reduce((acc, p) => acc.union(p.get('songs')), Set()).toJS()
 }
 
 export default function (state: LibraryState = initialState, action: LibraryActions): LibraryState {

@@ -8,7 +8,8 @@ class Player extends Component {
   props: {
     sourceUrl: string,
     onNext: () => void,
-    onPrev: () => void
+    onPrev: () => void,
+    onTrackEnd: () => void
   };
 
   state: {
@@ -46,18 +47,20 @@ class Player extends Component {
        marginRight: 'auto', marginLeft: 'auto', overflow: 'visible'}}>
 
         <FloatingActionButton mini onClick={this.props.onPrev}>
-          Previous
+          <i className="material-icons">fast_rewind</i>
         </FloatingActionButton>
 
         <FloatingActionButton onClick={() => {this.setState({paused: !this.state.paused})}}>
-          {this.state.paused ? 'Play' : 'Pause'}
+          {this.state.paused ?
+            <i className="material-icons">play_arrow</i>
+            : <i className="material-icons">pause</i>}
         </FloatingActionButton>
 
         <FloatingActionButton mini onClick={this.props.onNext}>
-          Next
+          <i className="material-icons">fast_forward</i>
         </FloatingActionButton>
 
-        {this.props.sourceUrl && <audio ref='playerRef' src={this.props.sourceUrl}/>}
+        {this.props.sourceUrl && <audio ref='playerRef' src={this.props.sourceUrl} onEnded={(e) => {console.log('ended?', e.target.ended); this.props.onTrackEnd()}}/>}
 
       </div>
     )

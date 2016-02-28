@@ -12,9 +12,8 @@ export function addSongToPlaylist (song: Song, playlist: Playlist): TypedAsyncAc
   return dispatch => {
     const nextPlaylist = {...playlist, songs: playlist.songs.concat(song)}
     // TODO delete playlist from brian and create it again
-    return deletePlaylistCall(playlist)
-      .then(() => createPlaylistCall(nextPlaylist))
-      .then(p => dispatch({type: Constants.swapPlaylist, payload: {playlist: p, oldPlaylist: playlist}}))
+    return swapPlaylistCall(playlist, nextPlaylist)
+      .then(({result: {playlist}}) => dispatch({type: Constants.swapPlaylist, payload: {playlist, oldPlaylist: playlist}}))
   }
 }
 
@@ -97,6 +96,7 @@ export function getUser (): any {
         } else {
           dispatch({type: 'library:updatePlaylists', payload: {playlists}})
           dispatch(getPlaylists(playlists))
+          return result.user
         }
       }
     })

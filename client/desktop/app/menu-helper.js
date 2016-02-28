@@ -40,17 +40,12 @@ export default function makeMenu (window) {
           accelerator: 'CmdOrCtrl+R',
           click: (item, focusedWindow) => focusedWindow && focusedWindow.reload()
         }
-      ].concat(__DEV__ ? ([ // eslint-disable-line no-undef
+      ].concat([ // eslint-disable-line no-undef
         {label: 'Toggle Developer Tools',
           accelerator: (() => (process.platform === 'darwin') ? 'Alt+Command+I' : 'Ctrl+Shift+I')(),
           click: (item, focusedWindow) => focusedWindow && focusedWindow.toggleDevTools()
         }
-      ]) : [])
-    }, {
-      label: 'Help',
-      submenu: [
-        {label: 'Learn More', click () { shell.openExternal('https://keybase.io') }}
-      ]
+      ])
     }]
     const menu = Menu.buildFromTemplate(template)
     Menu.setApplicationMenu(menu)

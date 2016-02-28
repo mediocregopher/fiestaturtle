@@ -44,6 +44,7 @@
     "react-dom": "^0.14.6",
     "react-file-processor": "0.0.1",
     "react-flexbox": "^3.0.0",
+    "react-list": "^0.7.14",
     "react-redux": "^4.4.0",
     "react-tap-event-plugin": "^0.2.1",
     "reduce-reducers": "^0.1.1",

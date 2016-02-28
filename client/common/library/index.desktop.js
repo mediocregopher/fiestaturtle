@@ -38,12 +38,17 @@ class Library extends Component {
     songsToAdd: Array<Song>,
     playlistName: string,
     sortedBy: 'title' | 'artist' | 'genre' | 'album',
-    sortedByInverse: boolean
+    sortedByInverse: boolean,
+    queue: Array<any>,
+    playingIndex: number
   };
 
   constructor (props: any) {
     super(props)
-    this.state = {openedPlaylistWindow: false, playlistName: '', sortedBy: 'title', sortedByInverse: false, showPlaylistsDialog: false, songsToAdd: []}
+    this.state = {openedPlaylistWindow: false, playlistName: '', sortedBy: 'title', sortedByInverse: false, showPlaylistsDialog: false, songsToAdd: [],
+      queue: [],
+      playingIndex: -1
+    }
   }
 
   cancelNewPlaylist () {
@@ -75,6 +80,28 @@ class Library extends Component {
     this.setState({showPlaylistsDialog: false, songsToAdd: []})
   }
 
+  addSongToQueue (song: Song) {
+    this.setState({queue: this.state.queue.concat(song)})
+    if (this.state.playingIndex === -1) {
+      this.props.playSong(song)
+      this.setState({playingIndex: 0})
+    }
+  }
+
+  playNextSongInQueue () {
+    if (this.state.queue.length > this.state.playingIndex + 1) {
+      this.props.playSong(this.state.queue[this.state.playingIndex + 1])
+      this.setState({playingIndex: this.state.playingIndex + 1})
+    }
+  }
+
+  playPrevSongInQueue () {
+    if (this.state.playingIndex - 1 >= 0) {
+      this.props.playSong(this.state.queue[this.state.playingIndex - 1])
+      this.setState({playingIndex: this.state.playingIndex - 1})
+    }
+  }
+
   render () {
     if (this.props.playlists.length === 0) {
       return (
@@ -103,7 +130,7 @@ class Library extends Component {
             ['library_music', i => this.promptAddSongToPlaylist(songs[i])],
             ['delete', i => this.props.deleteSongFromLibrary(songs[i])]
           ]}
-          onClick={i => this.props.playSong(songs[i])}
+          onClick={i => this.addSongToQueue(songs[i])}
           headers={[
             ['Title', () => this.changeSortedBy('title')],
             ['Artist', () => this.changeSortedBy('artist')],
@@ -113,6 +140,28 @@ class Library extends Component {
           colFormatter={({meta: {title, artist, album, genre}}) => [title, artist, album, genre]}
           items={songs} />
 
+        {this.state.queue.length > 0 && (
+          <span style={globalStyles.flexBoxColumn}>
+          <span style={{fontSize: 42, textAlign: 'center'}}> ¿Por Queue? </span>
+          <SweetTable
+            icons={[
+              ['clear', i => console.log('remove from q')]
+            ]}
+            onClick={i => {}}
+            headers={[
+              ['Title', () => {}],
+              ['Artist', () => {}],
+            ]}
+            colFormatter={song => {
+              const {meta: {title, artist, album, genre}} = song
+              if (song === this.state.queue[this.state.playingIndex]) {
+                return ['-> ' + title, artist]
+              }
+              return [title, artist]
+            }}
+            items={this.state.queue} />
+            </span>
+        )}
         <span style={{fontSize: 42, textAlign: 'center'}}> Playlists </span>
         <SweetTable
           icons={[]}
@@ -124,7 +173,10 @@ class Library extends Component {
 
         <div style={{...globalStyles.flexBoxRow, marginTop: 'auto'}}>
           <div style={{flex: 2, overflow: 'visible'}}>
-            <Player/>
+            <Player
+              onTrackEnd={() => this.playNextSongInQueue()}
+              onNext={() => this.playNextSongInQueue()}
+              onPrev={() => this.playPrevSongInQueue()}/>
           </div>
           <div style={{marginTop: 'auto', marginLeft: 'auto', overflow: 'visible',
             marginRight: 20,
