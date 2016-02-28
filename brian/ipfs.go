@@ -24,24 +24,32 @@ func nsFilePath() string {
 	return path.Join(n.rdir, "ns")
 }
 
-func get(id fiestatypes.BlockID, res interface{}) error {
+func cat(id fiestatypes.BlockID) (io.ReadCloser, error) {
 	var err error
+	var r *uio.DagReader
 	n.with(func() {
-		var r *uio.DagReader
 		if r, err = coreunix.Cat(newCtx(), n.nd, string(id)); err != nil {
 			return
 		}
-		defer r.Close()
-
-		if err = json.NewDecoder(r).Decode(res); err != nil {
-			return
-		}
-
-		if ut, ok := res.(fiestatypes.Uploader); ok {
-			ut.SetID(id)
-		}
 	})
-	return err
+	return r, err
+}
+
+func get(id fiestatypes.BlockID, res interface{}) error {
+	rc, err := cat(id)
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	if err = json.NewDecoder(rc).Decode(res); err != nil {
+		return err
+	}
+
+	if ut, ok := res.(fiestatypes.Uploader); ok {
+		ut.SetID(id)
+	}
+	return nil
 }
 
 func put(res interface{}) (fiestatypes.BlockID, error) {
