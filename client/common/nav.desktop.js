@@ -6,6 +6,8 @@ import {globalStyles} from './styles/style-guide'
 import {navigateUp, routeAppend} from './actions/router'
 
 import RaisedButton from 'material-ui/lib/raised-button'
+import Divider from 'material-ui/lib/divider'
+
 
 import Upload from './upload/index.desktop'
 import Library from './library/index.desktop'
@@ -40,6 +42,7 @@ class Nav extends Component {
     }
 
     return (
+      <div style={{...globalStyles.flexBoxColumn, flex: 1}}>
 
       <div style={{...globalStyles.flexBoxColumn, marginTop: 40, marginLeft: 'auto', marginRight: 'auto', alignItems: 'center'}}>
 
@@ -57,9 +60,11 @@ class Nav extends Component {
           </div>
         </div>
 
-        <div style={{marginTop: 20}}>
-          <Library path={pathSoFar} />
-        </div>
+      </div>
+      <Divider style={{marginTop: 20}}/>
+      <div style={{marginTop: 20, flex: 2, display: 'flex'}}>
+        <Library path={pathSoFar} />
+      </div>
       </div>
     )
   }

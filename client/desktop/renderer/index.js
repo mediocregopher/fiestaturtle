@@ -22,7 +22,7 @@ import {ipcLogsRenderer} from '../app/console-helper'
 import loadPerf from '../shared/util/load-perf'
 import merge from 'lodash/merge'
 
-ipcLogsRenderer()
+// ipcLogsRenderer()
 
 if (module.hot) {
   module.hot.accept()

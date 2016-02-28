@@ -26,6 +26,7 @@ export function removeFromPlaylist (song: Song, playlist: Playlist): TypedAsyncA
 }
 
 export function createPlaylist (name: string): TypedAsyncAction<CreatePlaylist> {
+  console.log('creating playlist', name)
   return (dispatch, getState) => {
     if (getState().library.playlists.filter(p => name === p.name).length > 0) {
       dispatch({type: Constants.createPlaylist, error: true, payload: {error: 'name already taken'}})
@@ -48,6 +49,19 @@ export function deletePlaylist (playlist: Playlist): TypedAsyncAction<DeletePlay
       .then(() => dispatch({type: Constants.deletePlaylist, payload: {playlist}}))
   }
 }
+
+
+// TODO
+export function playSong (playlist: Playlist): TypedAsyncAction<DeletePlaylist> {
+  return dispatch => {
+  }
+}
+
+export function playPlaylist (playlist: Playlist): TypedAsyncAction<DeletePlaylist> {
+  return dispatch => {
+  }
+}
+
 
 // TODO delete playlist from brian and create it again
 function createPlaylistCall (playlist: Playlist): Promise {

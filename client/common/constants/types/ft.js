@@ -6,11 +6,11 @@ export type SongMeta = {
   album: string,
   albumartist: Array<string>,
   year: string,
-  track: NoOf,
-  disk: NoOf,
+  track: ?NoOf,
+  disk: ?NoOf,
   genre: Array<string>,
-  picture: Array<SongImage>,
-  duration: number,
+  picture: ?Array<SongImage>,
+  duration: ?number,
 }
 
 export type Base64 = string
@@ -26,7 +26,7 @@ export type Uploaded = {
 
 export type SongImage = {
   format: string,
-  song: Base64,
+  data: Base64,
   id: ?BlockID
 }
 
@@ -48,7 +48,7 @@ export type UploadedSongMeta = {
 export type Song = {
   version: number,
   meta: SongMeta,
-  UploadedSongMeta: UploadedSongMeta,
+  uploadedSongMeta?: UploadedSongMeta,
   url: string
 } & Uploaded
 
