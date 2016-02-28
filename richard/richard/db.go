@@ -95,7 +95,7 @@ func itemKey(i interface{}) string {
 		return ""
 	}
 
-	return itemKeyRaw("", up.ID)
+	return itemKeyRaw(typ, up.ID)
 }
 
 func setItem(i interface{}) error {
