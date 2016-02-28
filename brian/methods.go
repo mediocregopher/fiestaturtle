@@ -7,7 +7,9 @@ import (
 
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
+	"github.com/levenlabs/golib/rpcutil"
 	"github.com/mediocregopher/fiestaturtle/fiestatypes"
+	"github.com/mediocregopher/fiestaturtle/richard/richard"
 )
 
 type Brian struct{}
@@ -215,4 +217,33 @@ func (_ Brian) SetRichards(r *http.Request, args *SetRichardsArgs, res *struct{}
 		u.UserPrivate.Richards = args.Richards
 	})
 	return err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type SearchArgs struct {
+	Query string `json:"query"`
+}
+
+type SearchRes struct {
+	Items richard.Items `json:"items"`
+}
+
+func (_ Brian) Search(r *http.Request, args *SearchArgs, res *SearchRes) error {
+	var i richard.Items
+	rargs := richard.SearchArgs{Query: args.Query}
+	forEachRichard(func(r fiestatypes.Richard) error {
+		res := richard.SearchRes{}
+		err := rpcutil.JSONRPC2Call("http://"+r.Addr+"/rpc", &res, "Richard.Search", &rargs)
+		if err != nil {
+			return err
+		}
+
+		i.Songs = append(i.Songs, res.Items.Songs...)
+		i.Playlists = append(i.Playlists, res.Items.Playlists...)
+		i.Users = append(i.Users, res.Items.Users...)
+		return nil
+	})
+	res.Items = i
+	return nil
 }

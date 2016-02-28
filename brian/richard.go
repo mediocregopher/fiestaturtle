@@ -3,11 +3,12 @@ package main
 import (
 	"github.com/levenlabs/golib/rpcutil"
 	"github.com/mediocregopher/fiestaturtle/fiestatypes"
+	"github.com/mediocregopher/fiestaturtle/richard/richard"
 )
 
 var noRichardOps = false
 
-func forEachRichard(fn func(r Richard) error) error {
+func forEachRichard(fn func(r fiestatypes.Richard) error) error {
 	if noRichardOps {
 		return nil
 	}
@@ -28,7 +29,7 @@ func addRichardSong(s fiestatypes.Song) error {
 	args := richard.AddSongArgs{
 		Song: s,
 	}
-	return forEachRichard(func(r Richard) error {
+	return forEachRichard(func(r fiestatypes.Richard) error {
 		return rpcutil.JSONRPC2Call("http://"+r.Addr+"/rpc", &struct{}{}, "Richard.AddSong", &args)
 	})
 }
@@ -37,7 +38,7 @@ func addRichardPlaylist(s fiestatypes.Playlist) error {
 	args := richard.AddPlaylistArgs{
 		Playlist: s,
 	}
-	return forEachRichard(func(r Richard) error {
+	return forEachRichard(func(r fiestatypes.Richard) error {
 		return rpcutil.JSONRPC2Call("http://"+r.Addr+"/rpc", &struct{}{}, "Richard.AddPlaylist", &args)
 	})
 }

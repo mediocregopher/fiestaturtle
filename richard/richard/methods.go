@@ -55,3 +55,19 @@ func (_ Richard) AddUser(r *http.Request, args *AddUserArgs, res *struct{}) erro
 	}
 	return indexItem(args.User)
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type SearchArgs struct {
+	Query string `json:"query"`
+}
+
+type SearchRes struct {
+	Items Items `json:"items"`
+}
+
+func (_ Richard) Search(r *http.Request, args *SearchArgs, res *SearchRes) error {
+	var err error
+	res.Items, err = searchItems(args.Query)
+	return err
+}
