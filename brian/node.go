@@ -22,8 +22,7 @@ func newNode(live bool) (node, error) {
 	}
 
 	cfg := &core.BuildCfg{
-		//Online: live,
-		Online: false,
+		Online: live,
 	}
 
 	if live {
@@ -42,13 +41,13 @@ func newNode(live bool) (node, error) {
 	}
 	log.Infof("done initializing")
 
-	//if !live {
-	log.Infof("setting up offline routing")
-	if err := nd.SetupOfflineRouting(); err != nil {
-		return node{}, err
+	if !live {
+		log.Infof("setting up offline routing")
+		if err := nd.SetupOfflineRouting(); err != nil {
+			return node{}, err
+		}
+		log.Infof("done setting up offline routing")
 	}
-	log.Infof("done setting up offline routing")
-	//}
 
 	n := node{
 		nd:   nd,
