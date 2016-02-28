@@ -48,6 +48,6 @@ export function updateFileMeta (metadata: SongMetaData): TypedAsyncAction<Update
   }
 }
 
-export function reset (metadata: SongMetaData): Reset {
+export function reset (): Reset {
   return {type: Constants.reset, payload: {}}
 }

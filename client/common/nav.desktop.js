@@ -8,6 +8,7 @@ import {navigateUp, routeAppend} from './actions/router'
 import RaisedButton from 'material-ui/lib/raised-button'
 
 import Upload from './upload/index.desktop'
+import Library from './library/index.desktop'
 
 type Props = {
   username: ?string,
@@ -23,7 +24,6 @@ const water = `
 
 class Nav extends Component {
   componentDidMount () {
-    this.props.onUpload()
   }
 
   render () {
@@ -55,6 +55,10 @@ class Nav extends Component {
           <div style={globalStyles.flexBoxColumn}>
             <RaisedButton label='Upload' secondary onClick={this.props.onUpload}/>
           </div>
+        </div>
+
+        <div style={{marginTop: 20}}>
+          <Library path={pathSoFar} />
         </div>
       </div>
     )
