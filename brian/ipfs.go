@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"os"
 	"path"
 	"time"
 
@@ -101,4 +102,29 @@ func getNS(res interface{}) (BlockID, error) {
 	id := BlockID(nsb)
 	err = get(id, res)
 	return id, err
+}
+
+func getNSUser() (User, error) {
+	var u User
+	u.Uploaded = &Uploaded{}
+	_, err := getNS(&u)
+	if err != nil && !os.IsNotExist(err) {
+		return u, err
+	}
+	if err := u.decrypt(); err != nil {
+		return u, err
+	}
+	return u, nil
+}
+
+func putNSUser(u User) (User, error) {
+	if err := u.encrypt(); err != nil {
+		return u, err
+	}
+
+	// Make super sure that we never store the user with UserPrivate set
+	u.UserPrivate = UserPrivate{}
+
+	_, err := putNS(&u)
+	return u, err
 }

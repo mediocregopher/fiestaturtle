@@ -19,25 +19,12 @@ func RPC() http.Handler {
 }
 
 func updateUser(fn func(*User)) (User, error) {
-	var u User
-	u.Uploaded = &Uploaded{}
-	_, err := getNS(&u)
-	if err != nil && !os.IsNotExist(err) {
-		return u, err
-	}
-	if err := u.decrypt(); err != nil {
+	u, err := getNSUser()
+	if err != nil {
 		return u, err
 	}
 	fn(&u)
-	if err := u.encrypt(); err != nil {
-		return u, err
-	}
-
-	// Make super sure that we never store the user with UserPrivate set
-	u.UserPrivate = UserPrivate{}
-
-	_, err = putNS(&u)
-	return u, err
+	return putNSUser(u)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -164,10 +151,8 @@ type GetUserRes struct {
 func (_ Brian) GetUser(r *http.Request, args *GetUserArgs, res *GetUserRes) error {
 	var err error
 	if args.UserID == "" {
-		if _, err = getNS(&res.User); err != nil {
-			return err
-		}
-		return res.User.decrypt()
+		res.User, err = getNSUser()
+		return err
 	}
 
 	return get(args.UserID, &res.User)
