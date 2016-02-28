@@ -55,9 +55,10 @@ export default function makeMenu (window) {
       submenu: [
         {label: '&Close', accelerator: 'CmdOrCtrl+W', click () { this.remoteWindow.close() }}
       ]
-    }, {
-      label: 'Help',
-      submenu: [{label: 'Learn More', click () { shell.openExternal('https://keybase.io') }}]
+    },
+    {label: 'Toggle Developer Tools',
+      accelerator: (() => (process.platform === 'darwin') ? 'Alt+Command+I' : 'Ctrl+Shift+I')(),
+        click: (item, focusedWindow) => focusedWindow && focusedWindow.toggleDevTools()
     }]
     const menu = Menu.buildFromTemplate(template)
     window.setMenu(menu)
