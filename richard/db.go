@@ -90,17 +90,26 @@ func itemKey(i interface{}) string {
 	if up.ID == "" {
 		panic("invalid ID")
 	}
+	typ := itemType(i)
+	if typ == "" {
+		return ""
+	}
 
-	return itemKeyRaw(itemType(i), up.ID)
+	return itemKeyRaw("", up.ID)
 }
 
 func setItem(i interface{}) error {
+	k := itemKey(i)
+	if k == "" {
+		return nil
+	}
+
 	b, err := json.Marshal(i)
 	if err != nil {
 		return err
 	}
 
-	return p.Cmd("SET", itemKey(i), b).Err
+	return p.Cmd("SET", k, b).Err
 }
 
 func tokenize(s string) []string {
@@ -124,6 +133,11 @@ func tokenize(s string) []string {
 }
 
 func indexItem(i interface{}) error {
+	k := itemKey(i)
+	if k == "" {
+		return nil
+	}
+
 	var tokens []string
 
 	switch ii := i.(type) {
@@ -145,10 +159,12 @@ func indexItem(i interface{}) error {
 		return nil
 	}
 
-	k := itemKey(i)
 	args := make([]interface{}, 0, len(tokens)*2)
 	for _, tok := range tokens {
 		args = append(args, 0, fmt.Sprintf("%s|%s", tok, k))
+	}
+	if len(args) == 0 {
+		return nil
 	}
 
 	return p.Cmd("ZADD", autocompleteKey, args).Err

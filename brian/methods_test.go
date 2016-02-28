@@ -21,6 +21,8 @@ func init() {
 		panic(err)
 	}
 
+	noRichardOps = true
+
 	os.Remove(nsFilePath())
 	os.Remove(keyFilePath())
 }

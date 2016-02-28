@@ -55,8 +55,11 @@ func (_ Brian) UploadSongData(r *http.Request, args *UploadSongArgs, res *Upload
 	}
 
 	res.Song.Uploaded = &fiestatypes.Uploaded{}
-	_, err = put(&res.Song)
-	return err
+	if _, err = put(&res.Song); err != nil {
+		return err
+	}
+
+	return addRichardSong(res.Song)
 }
 
 func uploadSong(s *fiestatypes.Song, path string) error {
@@ -120,7 +123,11 @@ func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *Cr
 
 		u.Playlists = append(u.Playlists, p)
 	})
-	return err
+	if err != nil {
+		return err
+	}
+
+	return addRichardPlaylist(res.Playlist)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
