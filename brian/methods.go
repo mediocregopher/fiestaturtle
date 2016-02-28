@@ -18,17 +18,29 @@ func RPC() http.Handler {
 	return s
 }
 
+func updateUser(fn func(*User)) error {
+	var u User
+	u.Uploaded = &Uploaded{}
+	_, err := getNS(&u)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	fn(&u)
+	_, err = putNS(&u)
+	return err
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type UploadSongArgs struct {
-	Song Song
+	Song Song `json:"song"`
 
 	// optional, not needed if Song is using a URL
-	SongPath string
+	SongPath string `json:"songPath"`
 }
 
 type UploadSongRes struct {
-	Song Song
+	Song Song `json:"song"`
 }
 
 func (_ Brian) UploadSongData(r *http.Request, args *UploadSongArgs, res *UploadSongRes) error {
@@ -82,6 +94,7 @@ func uploadSongImgs(s *Song) error {
 
 type CreatePlaylistArgs struct {
 	Playlist Playlist `json:"playlist"`
+	Replaces BlockID  `json:"replaces"`
 }
 
 type CreatePlaylistRes struct {
@@ -91,21 +104,58 @@ type CreatePlaylistRes struct {
 func (_ Brian) CreatePlaylist(r *http.Request, args *CreatePlaylistArgs, res *CreatePlaylistRes) error {
 	res.Playlist = args.Playlist
 	res.Playlist.Uploaded = &Uploaded{}
-	_, err := put(&res.Playlist)
-	return err
+	if _, err := put(&res.Playlist); err != nil {
+		return err
+	}
+
+	return updateUser(func(u *User) {
+		p := res.Playlist
+		p.Songs = nil
+		if args.Replaces != "" {
+			for i := range u.Playlists {
+				if u.Playlists[i].ID == args.Replaces {
+					u.Playlists[i] = p
+					return
+				}
+			}
+		}
+
+		u.Playlists = append(u.Playlists, p)
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type GetPlaylistByIDArgs struct {
+type GetPlaylistArgs struct {
 	PlaylistID BlockID `json:"playlistID"`
 }
 
-type GetPlaylistByIDRes struct {
+type GetPlaylistRes struct {
 	Playlist Playlist `json:"playlist"`
 }
 
-func (_ Brian) GetPlaylistByID(r *http.Request, args *GetPlaylistByIDArgs, res *GetPlaylistByIDRes) error {
+func (_ Brian) GetPlaylist(r *http.Request, args *GetPlaylistArgs, res *GetPlaylistRes) error {
 	res.Playlist.Uploaded = &Uploaded{}
 	return get(args.PlaylistID, &res.Playlist)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type GetUserArgs struct {
+	// optional, returns this node's user if not set
+	UserID BlockID `json:"userID"`
+}
+
+type GetUserRes struct {
+	User User `json:"user"`
+}
+
+func (_ Brian) GetUser(r *http.Request, args *GetUserArgs, res *GetUserRes) error {
+	var err error
+	if args.UserID == "" {
+		_, err = getNS(&res.User)
+	} else {
+		err = get(args.UserID, &res.User)
+	}
+	return err
 }

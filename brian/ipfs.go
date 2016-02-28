@@ -18,6 +18,10 @@ func newCtx() context.Context {
 	return ctx
 }
 
+func nsFilePath() string {
+	return path.Join(n.rdir, "ns")
+}
+
 func get(id BlockID, res interface{}) error {
 	var err error
 	n.with(func() {
@@ -77,7 +81,7 @@ func putNS(res interface{}) (BlockID, error) {
 		return "", err
 	}
 
-	return id, ioutil.WriteFile(path.Join(n.rdir, "ns"), []byte(id), 0644)
+	return id, ioutil.WriteFile(nsFilePath(), []byte(id), 0644)
 }
 
 func getNodeID() NodeID {
@@ -89,7 +93,7 @@ func getNodeID() NodeID {
 }
 
 func getNS(res interface{}) (BlockID, error) {
-	nsb, err := ioutil.ReadFile(path.Join(n.rdir, "ns"))
+	nsb, err := ioutil.ReadFile(nsFilePath())
 	if err != nil {
 		return "", err
 	}

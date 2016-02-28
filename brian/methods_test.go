@@ -7,24 +7,29 @@ import (
 	"path"
 	. "testing"
 
-	logging "gx/ipfs/Qmazh5oNUVsDZTs2g59rq8aYQqwpss8tcUWQzor5sCCEuH/go-log"
-
 	"github.com/levenlabs/golib/rpcutil"
 	"github.com/levenlabs/golib/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var log = logging.Logger("brian")
-
 func init() {
-	// TODO initialize a new ipfs for testing
-
 	var err error
-	n, err = newNode("~/.ipfs")
+	n, err = newNode(false)
 	if err != nil {
-		log.Fatalf("newNode error: %s", err)
+		panic(err)
 	}
+
+	os.Remove(nsFilePath())
+}
+
+func getUser(t *T) User {
+	h := RPC()
+	args := GetUserArgs{}
+	res := GetUserRes{}
+	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.GetUser", &args)
+	require.Nil(t, err)
+	return res.User
 }
 
 func randSong(t *T) Song {
@@ -84,7 +89,7 @@ func randPlaylist(t *T) Playlist {
 			randSong(t),
 		},
 	}
-	args := CreatePlaylistArgs{p}
+	args := CreatePlaylistArgs{Playlist: p}
 	var res CreatePlaylistRes
 	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.CreatePlaylist", &args)
 	require.Nil(t, err)
@@ -96,15 +101,31 @@ func TestCreatePlaylist(t *T) {
 	p := randPlaylist(t)
 	assert.NotEmpty(t, p.Uploaded.ID)
 	assert.NotEmpty(t, p.Uploaded.UploaderID)
+
+	p.Songs = nil
+	u := getUser(t)
+	require.Len(t, u.Playlists, 1)
+	assert.Equal(t, p, u.Playlists[0])
+
+	p.Name = testutil.RandStr()
+	h := RPC()
+	args := CreatePlaylistArgs{Playlist: p, Replaces: p.ID}
+	var res CreatePlaylistRes
+	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.CreatePlaylist", &args)
+	require.Nil(t, err)
+
+	u = getUser(t)
+	require.Len(t, u.Playlists, 1)
+	assert.Equal(t, res.Playlist, u.Playlists[0])
 }
 
-func TestGetPlaylistByID(t *T) {
+func TestGetPlaylist(t *T) {
 	h := RPC()
 	p := randPlaylist(t)
 
-	args := GetPlaylistByIDArgs{p.ID}
-	var res GetPlaylistByIDRes
-	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.GetPlaylistByID", &args)
+	args := GetPlaylistArgs{p.ID}
+	var res GetPlaylistRes
+	err := rpcutil.JSONRPC2CallHandler(h, &res, "Brian.GetPlaylist", &args)
 	require.Nil(t, err)
 	assert.Equal(t, p, res.Playlist)
 }

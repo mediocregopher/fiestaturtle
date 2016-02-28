@@ -18,18 +18,18 @@ func main() {
 
 	log.Infof("id: %q", n.nd.Identity.Pretty())
 
-	log.Infof("putNS")
-	msg := json.RawMessage(`{"foo":"bar"}`)
-	if _, err := putNS(&msg); err != nil {
-		log.Fatalf("err putNS: %s", err)
-	}
-	log.Infof("done with putNS")
+	//log.Infof("putNS")
+	//msg := json.RawMessage(`{"foo":"bar"}`)
+	//if _, err := putNS(&msg); err != nil {
+	//	log.Fatalf("err putNS: %s", err)
+	//}
+	//log.Infof("done with putNS")
 
 	log.Infof("getNS")
 	var res json.RawMessage
 	id, err := getNS(&res)
 	if err != nil {
-		log.Fatalf("getNS: %s", err)
+		log.Fatalf("getNS: %#v", err)
 	}
 	log.Infof("id:%q res:%s", id, string(res))
 }

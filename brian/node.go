@@ -21,15 +21,17 @@ func newNode(live bool) (node, error) {
 		return node{}, err
 	}
 
-	log.Infof("opening repo at %q", dir)
-	r, err := fsrepo.Open(dir)
-	if err != nil {
-		return node{}, err
+	cfg := &core.BuildCfg{
+		Online: live,
 	}
 
-	cfg := &core.BuildCfg{
-		Repo:   r,
-		Online: live,
+	if live {
+		log.Infof("opening repo at %q", dir)
+		r, err := fsrepo.Open(dir)
+		if err != nil {
+			return node{}, err
+		}
+		cfg.Repo = r
 	}
 
 	log.Infof("initializing node object")
