@@ -29,13 +29,13 @@ export default class SweetTable extends Component {
         <MenuItem innerDivStyle={{paddingRight: 0}} onTouchTap={() => this.props.onClick(index)}>
           <div style={{display: 'flex'}}>
             {this.props.colFormatter(item).map(i => <span key={i} style={colStyle}>{i}</span>)}
-            <div style={{width: 30 * this.props.icons.length, position: 'relative'}}>
-              {this.props.icons.map(([name, onClick]) => (
+            {this.props.icons.map(([name, onClick]) => (
+              <div style={{width: 30, position: 'relative'}}>
                 <FlatButton key={name} style={{margin: 0, padding: 0, height: 50, width: 20, flex: 1}} onClick={() => onClick(index)}>
                   <i className='material-icons' style={{position: 'relative', right: 30, top: 5}}>{name}</i>
                 </FlatButton>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </MenuItem>
       </div>

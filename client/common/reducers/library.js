@@ -113,6 +113,20 @@ export default function (state: LibraryState = initialState, action: LibraryActi
         }
       }
 
+    case 'library:updatePlaylists':
+      if (action.error) {
+        return {
+          ...state,
+          errorMessage: action.payload.error
+        }
+      } else {
+        const {playlists} = action.payload
+        return {
+          ...state,
+          playlists: playlists.map(p => p.songs ? p : {...p, songs: []})
+        }
+      }
+
     default:
       return state
   }

@@ -4,6 +4,7 @@ import {connect} from 'react-redux'
 
 import {globalStyles} from './styles/style-guide'
 import {navigateUp, routeAppend} from './actions/router'
+import {getUser} from './actions/library'
 
 import RaisedButton from 'material-ui/lib/raised-button'
 import Divider from 'material-ui/lib/divider'
@@ -26,6 +27,7 @@ const water = `
 
 class Nav extends Component {
   componentDidMount () {
+    this.props.getUser()
   }
 
   render () {
@@ -78,6 +80,7 @@ export default connect(
   (dispatch) => ({
     onUpload: () => dispatch(routeAppend('upload')),
     onSearch: () => dispatch(routeAppend('search')),
+    getUser: () => dispatch(getUser()),
     navUp: () => dispatch(navigateUp())
   }),
   (s, d, o) => ({

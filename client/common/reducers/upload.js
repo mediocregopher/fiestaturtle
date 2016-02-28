@@ -8,7 +8,7 @@ export type UploadState = {
   phase: 'TODO' | 'userUpload' | 'checking' | 'metaEdit' | 'uploadToService' | 'done',
   checkingMeta: boolean,
   files: Array<string>, // file paths
-  filesMetaData: Array<SongMetaData>,
+  filesMetaData: Array<{path: string, metadata: SongMetaData}>,
   metaReadError: Array<string>,
   editMessage: string,
   editingMetaDataIndex: number
@@ -48,7 +48,7 @@ export default function (state: UploadState = initialState, action: UploadAction
         return {
           ...state,
           checkingMeta: (state.filesMetaData.length + 1) !== state.files.length,
-          filesMetaData: [...state.filesMetaData, action.payload.metadata],
+          filesMetaData: [...state.filesMetaData, action.payload],
           editingMetaDataIndex: (state.filesMetaData.length + 1) === state.files.length ? 0 : state.editingMetaDataIndex,
         }
       }
@@ -58,7 +58,7 @@ export default function (state: UploadState = initialState, action: UploadAction
         return state
       } else {
         const copy = [...state.filesMetaData]
-        copy[state.editingMetaDataIndex] = action.payload.metadata
+        copy[state.editingMetaDataIndex].metadata = action.payload.metadata
         return {
           ...state,
           filesMetaData: copy,

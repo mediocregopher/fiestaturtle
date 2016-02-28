@@ -6,6 +6,8 @@ import type {Song, Playlist} from '../constants/types/ft'
 import type {TypedAsyncAction} from '../constants/types/flux'
 import type {SwapPlaylist, RemoveFromPlaylist, CreatePlaylist, DeletePlaylist} from '../constants/library'
 
+import {rpc} from '../util/rpc'
+
 export function addSongToPlaylist (song: Song, playlist: Playlist): TypedAsyncAction<SwapPlaylist> {
   return dispatch => {
     const nextPlaylist = {...playlist, songs: playlist.songs.concat(song)}
@@ -62,51 +64,68 @@ export function playPlaylist (playlist: Playlist): TypedAsyncAction<DeletePlayli
   }
 }
 
+export function deleteSongFromLibrary (song: Song): any {
+  return (dispatch, getState) => {
+    const lib = getState().library.playlists.filter(p => p.name === 'Library')[0]
+    const newSongs = lib.songs.filter(s => s !== song)
+    swapPlaylistCall(lib, {...lib, songs: newSongs}).then(() => {
+      dispatch(getUser())
+    })
+  }
+}
+
 export function getUser (): any {
   return dispatch => {
-    rpc('GetUser', {}).then(({error, result}) => {
+    return rpc('GetUser', {}).then(({error, result}) => {
       if (error) {
         console.error("Error fetching user:", error)
       } else {
         console.log('user result:', result)
+        const playlists = result.user.playlists || []
+        if (playlists.length === 0) {
+          createPlaylistCall({
+            version: 1,
+            name: 'Library',
+            songs: []
+          }).then(() => setTimeout(getUser, 100))
+        } else {
+          dispatch({type: 'library:updatePlaylists', payload: {playlists}})
+          dispatch(getPlaylists(playlists))
+        }
       }
     })
   }
 }
 
-function rpc (method: string, param: Object) {
-  return jsonRPC( {"jsonrpc": "2.0", "method": "Brian." + method, "params": param, "id": 1})
-    .then(r => r.json())
-}
-
-function jsonRPC (body: any) {
-  const msg = JSON.stringify({
-    ...body
-  })
-  const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json")
-  myHeaders.append('Access-Control-Allow-Origin', '*')
-  return fetch(
-    'http://localhost:4567/rpc',
-    {
-      headers: myHeaders,
-      method: 'POST',
-      body: msg
-    }
-  )
-}
-
-window.rpc = rpc
-
 // TODO delete playlist from brian and create it again
 function createPlaylistCall (playlist: Playlist): Promise {
-  return new Promise((resolve, reject) => {
-    resolve(playlist)
-  })
+  return rpc('CreatePlaylist', {playlist})
+}
+
+export function swapPlaylistCall (oldPlaylist: Playlist, newPlaylist: Playlist): Promise {
+  return rpc('CreatePlaylist', {playlist: newPlaylist, replaces: oldPlaylist.id})
 }
 
 function deletePlaylistCall (playlist: Playlist): Promise {
-  return new Promise((resolve, reject) => {
-    resolve()
-  })
+  return rpc('DeletePlaylist', {playlistID: playlist.id})
+}
+
+window.deletePlaylist = deletePlaylistCall
+
+export function getPlaylists (shellPlaylists: any): Promise {
+  return dispatch => {
+    return Promise.all(shellPlaylists.map(p => {
+      console.log('here2')
+      return rpc('GetPlaylist', {playlistID: p.id}).then(({result, error}) => {
+        console.log('here3', error, result)
+        if (error) {
+          console.error('error: ', error)
+          return
+        }
+        return result.playlist
+      })
+    })).then((newPlaylists) => {
+      dispatch({type: 'library:updatePlaylists', payload: {playlists: newPlaylists}})
+    })
+  }
 }

@@ -13,7 +13,7 @@ import Divider from 'material-ui/lib/divider'
 
 import SweetTable from '../table.desktop'
 
-import {createPlaylist, addSongToPlaylist, removeFromPlaylist, deletePlaylist, playSong, playPlaylist} from '../actions/library'
+import {deleteSongFromLibrary, createPlaylist, addSongToPlaylist, removeFromPlaylist, deletePlaylist, playSong, playPlaylist} from '../actions/library'
 
 import {deriveAllSongs} from '../reducers/library'
 
@@ -129,23 +129,21 @@ class Library extends Component {
     return (
       <div style={{...globalStyles.noSelect, ...globalStyles.flexBoxColumn, flex: 2}}>
         <span style={{fontSize: 42, textAlign: 'center'}}> Your Música </span>
-        <div style={{display: 'flex', marginLeft: 16}}>
-          <FlatButton labelStyle={{padding: 0}} style={colStyle} label={'Title'}
-            onClick={() => this.changeSortedBy('title')}/>
-          <FlatButton labelStyle={{padding: 0}} style={colStyle} label={'Artist'}
-            onClick={() => this.changeSortedBy('artist')}/>
-          <FlatButton labelStyle={{padding: 0}} style={colStyle} label={'Album'}
-            onClick={() => this.changeSortedBy('album')}/>
-          <FlatButton labelStyle={{padding: 0}} style={colStyle} label={'Genre'}
-            onClick={() => this.changeSortedBy('genre')}/>
-          <div style={{width: 50}}/>
-        </div>
-        <Divider/>
 
-        <ReactList
-          itemRenderer={(i, k) => this.renderItem(songs[i], k)}
-          length={songs.length}
-          type='uniform'/>
+        <SweetTable
+          icons={[
+            ['library_music', i => this.promptAddSongToPlaylist(songs[i])],
+            ['delete', i => this.props.deleteSongFromLibrary(songs[i])]
+          ]}
+          onClick={i => this.props.playSong(songs[i])}
+          headers={[
+            ['Title', () => this.changeSortedBy('title')],
+            ['Artist', () => this.changeSortedBy('artist')],
+            ['Album', () => this.changeSortedBy('album')],
+            ['Genre', () => this.changeSortedBy('genre')]
+          ]}
+          colFormatter={({meta: {title, artist, album, genre}}) => [title, artist, album, genre]}
+          items={songs} />
 
         <Divider/>
         <span style={{fontSize: 42, textAlign: 'center'}}> Playlists </span>
@@ -213,7 +211,7 @@ export default connect(
     const {errorMessage, playlists} = s.library
     return {errorMessage, playlists}
   },
-  d => (bindActionCreators({createPlaylist, deletePlaylist, removeFromPlaylist, addSongToPlaylist, playSong, playPlaylist}, d))
+  d => (bindActionCreators({deleteSongFromLibrary, createPlaylist, deletePlaylist, removeFromPlaylist, addSongToPlaylist, playSong, playPlaylist}, d))
 )(Library)
 
 const styles = {

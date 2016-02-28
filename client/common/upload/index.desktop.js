@@ -36,7 +36,7 @@ class Upload extends Component {
     if (this.props.upload.checkingMeta) {
       return (
         <div style={{...globalStyles.flexBoxColumn, marginTop: 40, marginLeft: 'auto', marginRight: 'auto', alignItems: 'center'}}>
-          <div> Checking meta data... {this.props.upload.filesMetaData + 1} of {this.props.upload.files}</div>
+          <div> Checking meta data... {this.props.upload.filesMetaData.length + 1} of {this.props.upload.files.length}</div>
         </div>
       )
     }
@@ -44,7 +44,7 @@ class Upload extends Component {
     if (this.props.upload.filesMetaData.length === this.props.upload.files.length && this.props.upload.files.length > 0 && this.props.upload.phase !== 'uploadToService') {
       const {editingMetaDataIndex, filesMetaData, editMessage} = this.props.upload
       return (
-        <EditMetaData editMessage={editMessage} index={editingMetaDataIndex} songMetas={filesMetaData} nextOrDone={(songMeta) => {this.props.nextOrDone(songMeta)}}/>
+        <EditMetaData editMessage={editMessage} index={editingMetaDataIndex} songMetas={filesMetaData.map(m => m.metadata)} nextOrDone={(songMeta) => {this.props.nextOrDone(songMeta)}}/>
       )
     }
 

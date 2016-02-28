@@ -41,7 +41,7 @@ export default class Upload extends Component {
             defaultValue={songMeta.title}/>
           <TextField
             floatingLabelText={"Artist"}
-            onChange={({target: {value: artist}}) => this.setState({artist})}
+            onChange={({target: {value: artist}}) => this.setState({artist: [artist]})}
             defaultValue={songMeta.artist}/>
           <TextField
             floatingLabelText={"Album"}
@@ -49,11 +49,11 @@ export default class Upload extends Component {
             defaultValue={songMeta.album}/>
           <TextField
             floatingLabelText={"Genre (Optional)"}
-            onChange={({target: {value: genre}}) => this.setState({genre})}
+            onChange={({target: {value: genre}}) => this.setState({genre: [genre]})}
             defaultValue={songMeta.genre}/>
           <TextField
             floatingLabelText={"Album Artists (Optional)"}
-            onChange={({target: {value: albumartist}}) => this.setState({albumartist})}
+            onChange={({target: {value: albumartist}}) => this.setState({albumartist: [albumartist]})}
             defaultValue={songMeta.albumartist}/>
           <TextField
             floatingLabelText={"Year (Optional)"}
