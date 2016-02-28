@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	. "testing"
 
 	"github.com/levenlabs/golib/testutil"
@@ -43,4 +44,42 @@ func TestSetGet(t *T) {
 	assert.Equal(t, p, i.Playlists[0])
 	assert.Len(t, i.Users, 1)
 	assert.Equal(t, u, i.Users[0])
+}
+
+func TestTokenize(t *T) {
+	ss := map[string][]string{
+		"":                         []string{},
+		"foo":                      []string{"foo"},
+		"foo bar":                  []string{"foo", "bar"},
+		"Foo Bar":                  []string{"foo", "bar"},
+		"foo, bar":                 []string{"foo", "bar"},
+		"this, that. other?":       []string{"this", "that", "other"},
+		"okie-dokie, hokie-smokie": []string{"okie", "dokie", "hokie", "smokie"},
+	}
+
+	for in, expected := range ss {
+		l := tokenize(in)
+		t.Logf("%q -> %#v", in, l)
+		assert.Equal(t, expected, l)
+	}
+}
+
+func TestIndexing(t *T) {
+	t1 := testutil.RandStr()
+	t2 := testutil.RandStr()
+	t3 := testutil.RandStr()
+	s := fiestatypes.Song{
+		Uploaded: &fiestatypes.Uploaded{
+			ID: fiestatypes.BlockID(testutil.RandStr()),
+		},
+		SongMeta: fiestatypes.SongMeta{
+			Title: fmt.Sprintf("%s %s, %s", t1, t2, t3),
+		},
+	}
+	require.Nil(t, setItem(s))
+	require.Nil(t, indexItem(s))
+
+	it, err := searchItems(t1)
+	require.Nil(t, err)
+	assert.Equal(t, s, it.Songs[0])
 }
