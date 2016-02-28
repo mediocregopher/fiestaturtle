@@ -1,35 +1,30 @@
 package main
 
 import (
-	"encoding/json"
-	logging "gx/ipfs/Qmazh5oNUVsDZTs2g59rq8aYQqwpss8tcUWQzor5sCCEuH/go-log"
+	logging "gx/ipfs/QmQvJiADDe7JR4m968MwXobTCCzUqQkP87aRHe29MEBGHV/go-logging"
+	logger "gx/ipfs/Qmazh5oNUVsDZTs2g59rq8aYQqwpss8tcUWQzor5sCCEuH/go-log"
+	"net/http"
 )
 
 var n node
-var log = logging.Logger("brian")
+var log = logger.Logger("brian")
+
+func init() {
+	logger.SetAllLoggers(logging.INFO)
+}
 
 func main() {
 	log.Infof("starting")
 	var err error
-	n, err = newNode(false)
+	n, err = newNode(true)
 	if err != nil {
 		log.Fatalf("could not setup node: %s", err)
 	}
 
-	log.Infof("id: %q", n.nd.Identity.Pretty())
-
-	//log.Infof("putNS")
-	//msg := json.RawMessage(`{"foo":"bar"}`)
-	//if _, err := putNS(&msg); err != nil {
-	//	log.Fatalf("err putNS: %s", err)
-	//}
-	//log.Infof("done with putNS")
-
-	log.Infof("getNS")
-	var res json.RawMessage
-	id, err := getNS(&res)
-	if err != nil {
-		log.Fatalf("getNS: %#v", err)
-	}
-	log.Infof("id:%q res:%s", id, string(res))
+	http.Handle("/rpc", RPC())
+	go func() {
+		log.Fatal(http.ListenAndServe(":4567", nil))
+	}()
+	log.Info("listening on :4567")
+	select {}
 }
